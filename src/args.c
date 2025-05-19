@@ -45,18 +45,20 @@ void parse_args(int argc,char** args, struct args* argStruct){
             dirPath=optarg;
             break;
         default:
-            fprintf(stderr,"ERROR: unknown argument %c\n",opt);
+            fprintf(stderr,"ERROR: unknown argument %c\n",optopt);
             exit(EXIT_FAILURE);
         }
     }
-
-
+    /* TODO: asignar n default 
+    if(n==1){
+        
+    }
+    */
     if(!(recoverMode ^ distributeMode)){
         fprintf(stderr,"ERROR: either -d OR -r must be specified\n");
         exit(EXIT_FAILURE);
     }
     if(k<2||k>10){
-        
         fprintf(stderr,"ERROR: invalid k value\n");
         exit(EXIT_FAILURE);
     }
