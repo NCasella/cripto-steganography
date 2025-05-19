@@ -1,0 +1,1 @@
+/usr/bin/cc -g CMakeFiles/cripto_steganography.dir/src/bmp.c.o CMakeFiles/cripto_steganography.dir/main.c.o -o cripto_steganography 
