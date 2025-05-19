@@ -3,7 +3,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <errno.h>
@@ -17,7 +16,6 @@ typedef struct BMPImageStruct{
 
 BMPImage readImage(const char *filename) {
     FILE *imageFile = fopen(filename, "rb");
-
     if (!imageFile) {
         perror("Error opening file");
         return NULL;
@@ -36,7 +34,7 @@ BMPImage readImage(const char *filename) {
         return NULL;
     }
 
-    if (fread(bmp->header, sizeof(byte), HEADER_SIZE, imageFile) != HEADER_SIZE) {
+    if (fread(bmp->header, 1, HEADER_SIZE, imageFile) != HEADER_SIZE) {
         perror("Error reading header");
         fclose(imageFile);
         free(bmp->header);
@@ -47,12 +45,16 @@ BMPImage readImage(const char *filename) {
     if (fseek(imageFile, bmp->header->offset, SEEK_SET) != 0) {
         perror("Error seeking to pixel data");
         fclose(imageFile);
-        closeImage(bmp);
+        free(bmp->header);
+        free(bmp);
         return NULL;
     }
-    uint32_t data_size = bmp->header->size - bmp->header->offset;
 
-    bmp->data = malloc(data_size);
+    if (bmp->header->image_size_bytes == 0) {
+        bmp->header->image_size_bytes = bmp->header->width_px * bmp->header->height_px * (bmp->header->bits_per_pixel / 8);
+    }
+
+    bmp->data = malloc(bmp->header->image_size_bytes);
     if (!bmp->data) {
         fclose(imageFile);
         free(bmp->header);
@@ -60,11 +62,12 @@ BMPImage readImage(const char *filename) {
         return NULL;
     }
 
-    fseek(imageFile, bmp->header->offset, SEEK_SET);
-    if (fread(bmp->data, sizeof(byte), bmp->header->image_size_bytes, imageFile) != bmp->header->image_size_bytes) {
+    if (fread(bmp->data, 1, bmp->header->image_size_bytes, imageFile) != bmp->header->image_size_bytes) {
         perror("Error reading image data");
         fclose(imageFile);
-        closeImage(bmp);
+        free(bmp->data);
+        free(bmp->header);
+        free(bmp);
         return NULL;
     }
 
@@ -130,25 +133,40 @@ int _mkdirs(const char *path) {
 void writeImage(BMPImage bmp, const char *filename) {
     char dirpath[1024];
     strncpy(dirpath, filename, sizeof(dirpath));
-    dirpath[sizeof(dirpath)-1] = 0;
+    dirpath[sizeof(dirpath) - 1] = '\0';
 
     char *last_slash = strrchr(dirpath, '/');
     if (last_slash) {
-        *last_slash = 0;
+        *last_slash = '\0';
         if (_mkdirs(dirpath) != 0) {
             fprintf(stderr, "Failed to create directories for path: %s\n", dirpath);
             return;
         }
     }
 
-    FILE* file = fopen(filename, "wb");
+    FILE *file = fopen(filename, "wb");
     if (!file) {
         fprintf(stderr, "Failed to open file for writing: %s\n", filename);
         return;
     }
 
-    fwrite(bmp->header, 1, HEADER_SIZE, file);
-    fwrite(bmp->data, 1, bmp->header->size + bmp->header->offset, file);
+    if (fwrite(bmp->header, 1, bmp->header->offset, file) != bmp->header->offset) {
+        fprintf(stderr, "Failed to write header to file: %s\n", filename);
+        fclose(file);
+        return;
+    }
+
+    size_t pixel_data_size = bmp->header->size - bmp->header-> offset;
+    if (pixel_data_size == 0) {
+        pixel_data_size = bmp->header->size - bmp->header->offset;
+    }
+
+    if (fwrite(bmp->data, 1, pixel_data_size, file) != pixel_data_size) {
+        fprintf(stderr, "Failed to write image data to file: %s\n", filename);
+        fclose(file);
+        return;
+    }
+
     fclose(file);
 }
 
