@@ -156,7 +156,7 @@ void writeImage(BMPImage bmp, const char *filename) {
         return;
     }
 
-    size_t pixel_data_size = bmp->header->size - bmp->header-> offset;
+    size_t pixel_data_size = bmp->header->image_size_bytes;
     if (pixel_data_size == 0) {
         pixel_data_size = bmp->header->size - bmp->header->offset;
     }
@@ -174,5 +174,13 @@ void closeImage(BMPImage bmp) {
     free(bmp->data);
     free(bmp->header);
     free(bmp);
+}
+
+BMPHeader* getHeader(BMPImage bmp) {
+    return bmp->header;
+}
+
+byte* getData(BMPImage bmp) {
+    return bmp->data;
 }
 
