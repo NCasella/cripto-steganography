@@ -176,8 +176,8 @@ void closeImage(BMPImage bmp) {
     free(bmp);
 }
 
-BMPHeader* getHeader(BMPImage bmp) {
-    return bmp->header;
+void getHeaderCopy(BMPImage bmp, BMPHeader* toCopy) {
+    memcpy(toCopy, bmp->header, HEADER_SIZE);
 }
 
 byte* getData(BMPImage bmp) {
