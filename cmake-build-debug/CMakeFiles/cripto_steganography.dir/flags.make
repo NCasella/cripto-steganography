@@ -4,7 +4,7 @@
 # compile C with /usr/bin/cc
 C_DEFINES = 
 
-C_INCLUDES = -I/mnt/c/Users/timos/OneDrive/Documentos/Timo/ITBA/Cripto/cripto-steganography/include -I/mnt/c/Users/timos/OneDrive/Documentos/Timo/ITBA/Cripto/cripto-steganography/src
+C_INCLUDES = -I/mnt/c/Users/timos/OneDrive/Documentos/Timo/ITBA/Cripto/cripto-steganography/src/include -I/mnt/c/Users/timos/OneDrive/Documentos/Timo/ITBA/Cripto/cripto-steganography/src
 
 C_FLAGS = -g -std=gnu11
 

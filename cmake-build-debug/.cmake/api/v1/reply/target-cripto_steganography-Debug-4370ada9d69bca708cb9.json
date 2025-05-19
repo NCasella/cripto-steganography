@@ -58,7 +58,7 @@
 			[
 				{
 					"backtrace" : 2,
-					"path" : "/mnt/c/Users/timos/OneDrive/Documentos/Timo/ITBA/Cripto/cripto-steganography/include"
+					"path" : "/mnt/c/Users/timos/OneDrive/Documentos/Timo/ITBA/Cripto/cripto-steganography/src/include"
 				},
 				{
 					"backtrace" : 3,
@@ -127,12 +127,12 @@
 	[
 		{
 			"backtrace" : 1,
-			"path" : "include/bmp.h",
+			"path" : "src/include/bmp.h",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
-			"path" : "include/utils.h",
+			"path" : "src/include/utils.h",
 			"sourceGroupIndex" : 0
 		},
 		{
