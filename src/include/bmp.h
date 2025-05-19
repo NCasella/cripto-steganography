@@ -40,5 +40,9 @@ void writeImage(BMPImage bmp, const char *filename);
 
 void closeImage(BMPImage bmp);
 
+void getHeaderCopy(BMPImage bmp, BMPHeader* toCopy);
+
+byte* getData(BMPImage bmp);
+
 
 #endif //CRIPTO_STEGANOGRAPHY_BMPADT_H
