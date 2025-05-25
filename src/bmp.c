@@ -27,14 +27,20 @@ BMPImage readImage(const char *filename) {
         return NULL;
     }
 
-    bmp->header = malloc(HEADER_SIZE);
+    BMPHeader* auxHeader = malloc(HEADER_SIZE);
+
+    fread(auxHeader, 1, HEADER_SIZE, imageFile);
+
+    bmp->header = malloc(auxHeader->offset);
     if (!bmp->header) {
         fclose(imageFile);
         free(bmp);
         return NULL;
     }
 
-    if (fread(bmp->header, 1, HEADER_SIZE, imageFile) != HEADER_SIZE) {
+    rewind(imageFile);
+
+    if (fread(bmp->header, 1, auxHeader->offset, imageFile) != auxHeader->offset) {
         perror("Error reading header");
         fclose(imageFile);
         free(bmp->header);
@@ -71,6 +77,7 @@ BMPImage readImage(const char *filename) {
         return NULL;
     }
 
+    free(auxHeader);
     fclose(imageFile);
     return bmp;
 }

@@ -99,5 +99,6 @@ static int getImagesInDirectory( char* directory){
         if(extension!=NULL && strcmp(extension,".bmp"))
             n++;
     }
+    closedir(dir);
     return n;
 }
