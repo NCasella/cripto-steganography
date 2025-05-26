@@ -66,7 +66,7 @@ void encrypt(int r, int n){
         }
         printf("Current poly:");
         for(int m=0; m<pol_size;m++){
-            printf("+%dx^%d", coeficcients[m], m);
+            printf("+%dx^%d", coefficients[m], m);
         }
         printf("\n");
         for(int k=1; k<=n; k++){
@@ -74,7 +74,7 @@ void encrypt(int r, int n){
             //piso el j-esimo bit en la k-esima shadow
             //shadows[k-1][j] = compute_polynomial(k, coefficients);
         }
-        printf("fin seccion %d, [%d, %d]", j, offset, offset+j);
+        printf("fin seccion %d, [%d, %d]\n", j, offset+1, offset+r);
     }
 
 }
@@ -82,11 +82,14 @@ void encrypt(int r, int n){
 
 int compute_polynomial(int shadow, int pol_size, int * coefficients){
     int result=0;
+    long long unsigned int partial = 0;
     for(int i=0; i<pol_size; i++){
         //caso especial p(i)=256
-        result+= (coefficients[i] * pow(shadow,i))%257;
+        partial = pow(shadow,i);
+        result+= (coefficients[i] * partial%257);
     }
-    return result;    
+    int toReturn = result%257;
+    return toReturn<0? toReturn+257 : toReturn;    
 }
 
 int create_shadows(uint64_t ** shadows, int n, int shadow_size){
@@ -96,7 +99,6 @@ int create_shadows(uint64_t ** shadows, int n, int shadow_size){
     //asumimos n y r validados
     for(int i=0; i<n; i++){
         shadows[i] = createBlankImage(shadow_size);  
-
         writeImage(shadows[i], filename);
         nbr=nbr+i;
         filename[13]=nbr;  

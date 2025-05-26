@@ -86,7 +86,9 @@ BMPImage createBlankImage(uint32_t imageSize) {
     BMPImage bmp = malloc(sizeof(BMPImageStruct));
     bmp->header = malloc(HEADER_SIZE);
     bmp->header->image_size_bytes = imageSize;
+    bmp->header->offset = HEADER_SIZE;
     bmp->data = malloc(sizeof(byte) * imageSize);
+    bmp->header->size = imageSize + HEADER_SIZE;
     return bmp;
 }
 
