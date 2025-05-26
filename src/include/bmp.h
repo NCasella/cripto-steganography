@@ -11,8 +11,8 @@
 typedef struct {
     uint16_t  type;
     uint32_t  size;
-    uint16_t  reserved1;
-    uint16_t  reserved2;
+    uint16_t  seed;
+    uint16_t  shadowNumber;
     uint32_t  offset;
     uint32_t  dib_header_size;
     int32_t   width_px;
@@ -32,15 +32,17 @@ typedef struct BMPImageStruct* BMPImage;
 
 BMPImage readImage(const char *filename);
 
-BMPImage createBlankImage(uint32_t imageSize);
+BMPImage createBlankImage(uint32_t imageSize, uint32_t headerSize);
 
-BMPImage createImageFromData(BMPHeader header, byte* data, uint32_t size);
+BMPImage createImageFromData(BMPHeader* header, byte* data, uint32_t size, uint32_t width, uint32_t height);
 
 void writeImage(BMPImage bmp, const char *filename);
 
 void closeImage(BMPImage bmp);
 
 void getHeaderCopy(BMPImage bmp, BMPHeader* toCopy);
+
+uint32_t getHeaderSize(BMPImage bmp);
 
 byte* getData(BMPImage bmp);
 

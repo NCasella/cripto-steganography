@@ -82,18 +82,26 @@ BMPImage readImage(const char *filename) {
     return bmp;
 }
 
-BMPImage createBlankImage(uint32_t imageSize) {
+BMPImage createBlankImage(uint32_t imageSize, uint32_t headerSize) {
     BMPImage bmp = malloc(sizeof(BMPImageStruct));
-    bmp->header = malloc(HEADER_SIZE);
+    bmp->header = malloc(headerSize);
     bmp->header->image_size_bytes = imageSize;
     bmp->data = malloc(sizeof(byte) * imageSize);
+    bmp->header->size = imageSize + headerSize;
     return bmp;
 }
 
-BMPImage createImageFromData(BMPHeader header, byte* data, uint32_t size) {
-    BMPImage bmp = createBlankImage(size);
+BMPImage createImageFromData(BMPHeader* header, byte* data, uint32_t size, uint32_t width, uint32_t height) {
+    BMPImage bmp = malloc(sizeof(BMPImageStruct));
+    bmp->header = malloc(header->offset);
+    bmp->data = malloc(sizeof(byte) * size);
     memcpy(bmp->data, data, size);
-    memcpy(bmp->header, &header, HEADER_SIZE);
+    memcpy(bmp->header, header, header->offset);
+    bmp->header->image_size_bytes = size;
+    bmp->header->size = size + header->offset;
+    bmp->header->width_px = width;
+    bmp->header->height_px = height;
+
     return bmp;
 }
 
@@ -185,6 +193,10 @@ void closeImage(BMPImage bmp) {
 
 void getHeaderCopy(BMPImage bmp, BMPHeader* toCopy) {
     memcpy(toCopy, bmp->header, HEADER_SIZE);
+}
+
+uint32_t getHeaderSize(BMPImage bmp) {
+    return bmp->header->offset;
 }
 
 byte* getData(BMPImage bmp) {

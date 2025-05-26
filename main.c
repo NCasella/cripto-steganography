@@ -15,8 +15,13 @@ int main(int argc, char **argv) {
     printf("Reading file\n");
     BMPImage bmp = readImage(argsStruct.imagePath);
     printf("Writing file\n");
-    writeImage(bmp, "src/output/image1_out.bmp");
+    BMPHeader* header = malloc(getHeaderSize(bmp));
+    getHeaderCopy(bmp, header);
+    BMPImage bmpAux = createImageFromData(header, getData(bmp), 3072, 32, 32);
+    writeImage(bmpAux, "src/output/image1_out.bmp");
     printf("Closing file\n");
+    free(header);
+    closeImage(bmpAux);
     closeImage(bmp);
     
     return 0;
