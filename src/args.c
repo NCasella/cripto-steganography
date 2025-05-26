@@ -2,7 +2,13 @@
 #include <stdio.h>
 #include "include/args.h"
 #include <getopt.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <strings.h>
+#include <string.h>
 
+static int getImagesInDirectory( char* directory);
 
 void parse_args(int argc,char** args, struct args* argStruct){
     bool distributeMode=0;
@@ -18,7 +24,7 @@ void parse_args(int argc,char** args, struct args* argStruct){
         {"k",required_argument, NULL,'k'},
         {"n",required_argument, NULL,'n'},
         {"secret",required_argument, NULL, 0xaffa},
-        {"dir",optional_argument, NULL, 0xcafe}};
+        {"dir",required_argument, NULL, 0xcafe}};
     
     int opt;
     int optIndex;
@@ -45,26 +51,31 @@ void parse_args(int argc,char** args, struct args* argStruct){
             dirPath=optarg;
             break;
         default:
-            fprintf(stderr,"ERROR: unknown argument %c\n",opt);
+            fprintf(stderr,"FATAL: unknown argument %c\n",optopt);
             exit(EXIT_FAILURE);
         }
     }
 
-
+    if(n==-1){
+        n=getImagesInDirectory(dirPath);
+    }
+    /*   FIXME: descomentar luego de testear 
     if(!(recoverMode ^ distributeMode)){
-        fprintf(stderr,"ERROR: either -d OR -r must be specified\n");
+        fprintf(stderr,"FATAL: either -d OR -r must be specified\n");
         exit(EXIT_FAILURE);
     }
     if(k<2||k>10){
-        
-        fprintf(stderr,"ERROR: invalid k value\n");
+        fprintf(stderr,"FATAL: invalid k value\n");
         exit(EXIT_FAILURE);
     }
-    if(k>n){
-        fprintf(stderr,"ERROR: k greater than n value\n");
+    if(distributeMode && n<2){
+        fprintf(stderr,"FATAL: not enough images found on directory %s \n",dirPath);
+    }
+    if(distributeMode && k>n){
+        fprintf(stderr,"FATAL: k greater than n value\n");
         exit(EXIT_FAILURE);
     }
-    
+    */
     argStruct->operation=recoverMode?recoverMode:distributeMode;
     argStruct->imagePath=imagePath;
     argStruct->directoryPath=dirPath;
@@ -72,4 +83,22 @@ void parse_args(int argc,char** args, struct args* argStruct){
     argStruct->n=n;
 
     return;
+}
+
+static int getImagesInDirectory( char* directory){
+    struct dirent* dirent;
+    DIR* dir=opendir(directory);
+
+    int n=0;
+    if(dir==NULL){
+        fprintf(stderr,"FATAL: directory does not exist\n");
+        exit(EXIT_FAILURE);
+    }
+    while((dirent=readdir(dir))!=NULL){
+        char* extension=strrchr(dirent->d_name,'.');
+        if(extension!=NULL && strcmp(extension,".bmp"))
+            n++;
+    }
+    closedir(dir);
+    return n;
 }
