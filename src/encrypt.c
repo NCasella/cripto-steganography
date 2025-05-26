@@ -3,34 +3,13 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <math.h>
 #define MAX 50
 #define SET 10
 /*variable global*/
 
-int64_t seed; /*seed debe ser de 48 bits; se elige este tipo de 64 bits*/
-
-void setSeed(int64_t seed);
-uint8_t nextChar(void); /*devuelve un unsigned char*/
-int compute_polynomial(int shadow);
-
-int main(){
-    int i;
-    uint8_t num;
-    setSeed(SET);
-    for (i = 0; i < MAX; i++)
-    {
-        num = nextChar();
-        printf("%d\t", num);
-    }
-    return EXIT_SUCCESS;
-}
-void setSeed(int64_t s){
-    seed = (s ^ 0x5DEECE66DL) & ((1LL << 48) - 1);
-}
-uint8_t nextChar(void){
-    seed = (seed * 0x5DEECE66DL + 0xBL) & ((1LL << 48) - 1);
-    return (uint8_t)(seed >> 40);
-}
+int compute_polynomial(int shadow, int pol_size, int coefficients[DUMMY_START]);
+int create_shadows(uint64_t ** shadows, int n, int shadow_size);
 
 /*Forma de distribuir una foto en N sombras*/
 
@@ -60,35 +39,67 @@ void encrypt(int r, int n){
     
     int IMAGE_SIZE = 512;
     int shadow_size = IMAGE_SIZE / r;   //IMAGE_SIZE deberia ser global o recibirse por parametro
-    int section_amount = shadow_size;
-    uint8_t * shadows = {0}; //punteros a las sombras
+    uint64_t * shadows[DUMMY_START] = {0};
+    //int res = create_shadows(shadows, n, r); //punteros a las sombras
     
-    int coefficients[r] = {0}; //mod 251
+    
+    int coefficients[DUMMY_START] = {0}; //mod 251
+    int pol_size = 0;
     int offset = 0;
 
-    int encrypted_pixels[n] = {0};
-    int current_pixel = 0;
+    int encrypted_pixels[DUMMY_START] = {0};
 
     //para todas las secciones de la foto original -> #secciones = sizeof(shadows)
-    for(int j=0; j<r; j++){
+    for(int j=0; j<shadow_size; j++){
         
-        current_pixel = j; //cada nueva seccion de la foto D sera el siguiente pixel en las sombras 
-                          //por eso hay IMAGE_SIZE/r = tamaño de sombras = #secciones
+        //cada nueva seccion de la foto D sera el siguiente pixel en las sombras 
+        //por eso hay IMAGE_SIZE/r = tamaño de sombras = #secciones
                           
         offset=j*r; //tamaño de la seccion * seccion actual (j)
 
         //creo el j-esimo polinomio
+        pol_size=0;
         for(int i=0; i<r; i++){
-            polynomial[i]=bmp_image[offset+i]; //i-esimo pixel de la seccion j -> coeficiente del polinomio
+            //coefficients[i]=bmp_image[offset+i]; //i-esimo pixel de la seccion j -> coeficiente del polinomio
+            coefficients[i]=i;
+            pol_size++;
         }
+        printf("Current poly:");
+        for(int m=0; m<pol_size;m++){
+            printf("+%dx^%d", coeficcients[m], m);
+        }
+        printf("\n");
         for(int k=1; k<=n; k++){
-            shadows[k-1][current_pixel] = compute_polynomial(k, coefficients);
+            printf("p(%d)=%d\n", k, compute_polynomial(k, pol_size,coefficients));
+            //piso el j-esimo bit en la k-esima shadow
+            //shadows[k-1][j] = compute_polynomial(k, coefficients);
         }
+        printf("fin seccion %d, [%d, %d]", j, offset, offset+j);
     }
 
 }
 
 
-int compute_polynomial(int shadow, int coefficients[r]){
-    return shadow;
+int compute_polynomial(int shadow, int pol_size, int * coefficients){
+    int result=0;
+    for(int i=0; i<pol_size; i++){
+        //caso especial p(i)=256
+        result+= (coefficients[i] * pow(shadow,i))%257;
+    }
+    return result;    
+}
+
+int create_shadows(uint64_t ** shadows, int n, int shadow_size){
+
+    char filename[50] = "./src/output/0";
+    char nbr = '1';
+    //asumimos n y r validados
+    for(int i=0; i<n; i++){
+        shadows[i] = createBlankImage(shadow_size);  
+
+        writeImage(shadows[i], filename);
+        nbr=nbr+i;
+        filename[13]=nbr;  
+    }
+    return 0;
 }
