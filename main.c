@@ -12,15 +12,20 @@ int main(int argc, char **argv) {
         
     struct args argsStruct;
 
-    //parse_args(argc,argv,&argsStruct);
-    //printf("Reading file\n");
-    //BMPImage bmp = readImage(argsStruct.imagePath);
-    
-    //printf("Writing file\n");
-    //writeImage(bmp, "src/output/image1_out.bmp");
-    //printf("Closing file\n");
-    //closeImage(bmp);
-    
+    /*
+    parse_args(argc,argv,&argsStruct);
+    printf("Reading file\n");
+    BMPImage bmp = readImage(argsStruct.imagePath);
+    printf("Writing file\n");
+    BMPHeader* header = malloc(getHeaderSize(bmp));
+    getHeaderCopy(bmp, header);
+    BMPImage bmpAux = createImageFromData(header, getData(bmp), 3072, 32, 32);
+    writeImage(bmpAux, "src/output/image1_out.bmp");
+    printf("Closing file\n");
+    free(header);
+    closeImage(bmpAux);
+    closeImage(bmp);
+    */
     int n = 20;
     int r=10;
     int * shadows[10] = {0};
