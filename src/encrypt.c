@@ -98,7 +98,7 @@ int create_shadows(uint64_t ** shadows, int n, int shadow_size){
     char nbr = '1';
     //asumimos n y r validados
     for(int i=0; i<n; i++){
-        shadows[i] = createBlankImage(shadow_size);  
+        //shadows[i] = createBlankImage(shadow_size);
         writeImage(shadows[i], filename);
         nbr=nbr+i;
         filename[13]=nbr;  

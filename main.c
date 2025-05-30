@@ -9,31 +9,24 @@
 #include <stdlib.h>
 
 int main(int argc, char **argv) {
-        
-    struct args argsStruct;
 
-    /*
-    parse_args(argc,argv,&argsStruct);
-    printf("Reading file\n");
-    BMPImage bmp = readImage(argsStruct.imagePath);
-    printf("Writing file\n");
-    BMPHeader* header = malloc(getHeaderSize(bmp));
-    getHeaderCopy(bmp, header);
-    BMPImage bmpAux = createImageFromData(header, getData(bmp), 3072, 32, 32);
-    writeImage(bmpAux, "src/output/image1_out.bmp");
-    printf("Closing file\n");
-    free(header);
-    closeImage(bmpAux);
-    closeImage(bmp);
-    */
-    int n = 20;
-    int r=10;
-    int * shadows[10] = {0};
-    for(int i=0; i<n;i++){
-        create_shadows(shadows, n, r);
+    setSeed(123456789); // Set a fixed seed for reproducibility
+    BMPHeader header;
+    BMPImage image = readImage("src/input/image1.bmp");
+    getHeaderCopy(image, &header);
+
+printf("Photo bytes\n");
+    for(int j=0; j<10; j++){
+        printf("%x ", getByte(image, 0, j));
     }
+puts("obscured bytes\n");
 
-    //encrypt(10, 20);
+    uint16_t byteMatrix[header.height_px][header.width_px];
+    obscureMatrix(header.width_px, header.height_px, image, byteMatrix);
+    for(int i=0; i<10; i++){
+            printf("%x ", byteMatrix[0][i]);
+    }
+    closeImage(image);
     return 0;
 
 }

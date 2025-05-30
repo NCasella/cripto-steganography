@@ -46,5 +46,14 @@ uint32_t getHeaderSize(BMPImage bmp);
 
 byte* getData(BMPImage bmp);
 
+/**
+ * Returns the pixel value at a specific row and column in the BMP image.
+ *
+ * @param width     the width of the image.
+ * @param height    the height of the image.
+ * @param image     the bmp image.
+ * @return the pixel value or -1 if an error ocurred.
+ */
+int getByte(BMPImage image, int row, int column);
 
 #endif //CRIPTO_STEGANOGRAPHY_BMPADT_H
