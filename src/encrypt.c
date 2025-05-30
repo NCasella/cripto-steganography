@@ -40,8 +40,8 @@ void encrypt(int r, int n, char * imageName){
     BMPImage image = readImage(imageName);
     BMPHeader header;
     getHeaderCopy(image, &header);
-    uint16_t byteMatrix[header.height_px][header.width_px];
-    obscureMatrix(header.width_px, header.height_px, image, byteMatrix);
+    uint16_t obscuredImage[header.height_px * header.width_px];
+    obscureImage(header.width_px, header.height_px, image, obscuredImage);
 
     BMPPImage shadows[n];
 
@@ -49,30 +49,40 @@ void encrypt(int r, int n, char * imageName){
         encrypt_k8(n, byteMatrix, header.width_px, header.height_px, shadows);
     }
 
-    int IMAGE_SIZE = 512;
-    int shadow_size = IMAGE_SIZE / r;   //IMAGE_SIZE deberia ser global o recibirse por parametro
-    uint64_t * shadows[DUMMY_START] = {0};
-    //int res = create_shadows(shadows, n, r); //punteros a las sombras
-    
-    
-    int coefficients[DUMMY_START] = {0}; //mod 251
+
+
+}
+
+int compute_polynomial(int shadow, int pol_size, int * coefficients){
+    int result=0;
+    long long unsigned int partial = 0;
+    for(int i=0; i<pol_size; i++){
+        //caso especial p(i)=256
+        partial = pow(shadow,i);
+        result+= (coefficients[i] * partial%257);
+    }
+    int toReturn = result%257;
+    return toReturn<0? toReturn+257 : toReturn;    
+}
+
+void encrypt_k8(int n,int width, int height, uint16_t obscuredImage[width * height],  BMPPImage shadows[n]){
+    int shadow_size = width * height; //tamaño de las sombras
+    int coefficients[n]; //mod 257
     int pol_size = 0;
     int offset = 0;
 
-    int encrypted_pixels[DUMMY_START] = {0};
-
     //para todas las secciones de la foto original -> #secciones = sizeof(shadows)
-    for(int j=0; j<shadow_size; j++){
-        
-        //cada nueva seccion de la foto D sera el siguiente pixel en las sombras 
-        //por eso hay IMAGE_SIZE/r = tamaño de sombras = #secciones
-                          
-        offset=j*r; //tamaño de la seccion * seccion actual (j)
+    for(int j=0; j<(shadow_size / 8); j++){    //TODO corregir: se esta asumiendo divisible por 8
+
+        //cada nueva seccion de la foto Q sera el LSB del siguiente pixel en las sombras
+        //por eso hay IMAGE_SIZE/r = tamaño de sombras = #secciones //TODO k!=8
+
+        offset=j*8; //tamaño de la seccion * seccion actual (j)
 
         //creo el j-esimo polinomio
         pol_size=0;
         for(int i=0; i<r; i++){
-            //coefficients[i]=bmp_image[offset+i]; //i-esimo pixel de la seccion j -> coeficiente del polinomio
+            coefficients[i]=obscuredImage[offset+i]; //i-esimo pixel de la seccion j -> coeficiente del polinomio
             coefficients[i]=i;
             pol_size++;
         }
@@ -87,33 +97,29 @@ void encrypt(int r, int n, char * imageName){
             //shadows[k-1][j] = compute_polynomial(k, coefficients);
         }
         printf("fin seccion %d, [%d, %d]\n", j, offset+1, offset+r);
+
+
+/*
+por cada j -> agarro qj(num)
+para cada S_num hago
+-> S_num[j][LSB] = qj[]
+
+
+*/
+        for(int shadow=1; shadow<=n; shadow++){
+            uint8_t p_x = compute_polynomial(shadow, 8,coefficients);
+            uint8_t mascara = 0xFF;
+            uint8_t result;
+            for(int bit=1; bit<=8; bit++){
+                result =  mascara << (bit) ^
+
+10101010
+11111111
+s[bit] = mascara << (bit) & p_x
+
+
+            }
+        }
+
     }
-
-}
-
-
-int compute_polynomial(int shadow, int pol_size, int * coefficients){
-    int result=0;
-    long long unsigned int partial = 0;
-    for(int i=0; i<pol_size; i++){
-        //caso especial p(i)=256
-        partial = pow(shadow,i);
-        result+= (coefficients[i] * partial%257);
-    }
-    int toReturn = result%257;
-    return toReturn<0? toReturn+257 : toReturn;    
-}
-
-int create_shadows(uint64_t ** shadows, int n, int shadow_size){
-
-    char filename[50] = "./src/output/0";
-    char nbr = '1';
-    //asumimos n y r validados
-    for(int i=0; i<n; i++){
-        //shadows[i] = createBlankImage(shadow_size);
-        writeImage(shadows[i], filename);
-        nbr=nbr+i;
-        filename[13]=nbr;  
-    }
-    return 0;
 }

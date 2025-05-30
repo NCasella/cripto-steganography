@@ -204,15 +204,13 @@ byte* getData(BMPImage bmp) {
     return bmp->data;
 }
 
-int getByte(BMPImage image, int row, int column){
+int getByte(BMPImage image, int index){
 	byte * data = image->data;
     int width = image->header->width_px;
     int height = image->header->height_px;
 
-    if (row < 0 || row >= height || column < 0 || column >= width) {
-        return -1; // Return 0 for out of bounds access
+    if (index < 0 || index >= width * height) {
+        return -1; // Invalid index
     }
-
-    int index = row*width + column;
     return data[index];
 }
