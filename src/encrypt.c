@@ -32,11 +32,23 @@ int create_shadows(uint64_t ** shadows, int n, int shadow_size);
  
  */
 
-void encrypt(int r, int n){
+void encrypt(int r, int n, char * imageName){
     
     //genero n sombras -> n imagenes bmp
     //{puntero_bmp1,  puntero_bmp2, ...}
-    
+
+    BMPImage image = readImage(imageName);
+    BMPHeader header;
+    getHeaderCopy(image, &header);
+    uint16_t byteMatrix[header.height_px][header.width_px];
+    obscureMatrix(header.width_px, header.height_px, image, byteMatrix);
+
+    BMPPImage shadows[n];
+
+    if(r == 8){
+        encrypt_k8(n, byteMatrix, header.width_px, header.height_px, shadows);
+    }
+
     int IMAGE_SIZE = 512;
     int shadow_size = IMAGE_SIZE / r;   //IMAGE_SIZE deberia ser global o recibirse por parametro
     uint64_t * shadows[DUMMY_START] = {0};
