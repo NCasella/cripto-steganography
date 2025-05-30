@@ -14,5 +14,6 @@ struct args{
 };
 
 void parse_args(int argc,char** args,struct args* argStruct);
+int getImagesInDirectory( char* directory);
 
 #endif  /* ARGS_H */
