@@ -8,7 +8,7 @@
 #include <strings.h>
 #include <string.h>
 
-static int getImagesInDirectory( char* directory);
+
 
 void parse_args(int argc,char** args, struct args* argStruct){
     bool distributeMode=0;
@@ -85,7 +85,7 @@ void parse_args(int argc,char** args, struct args* argStruct){
     return;
 }
 
-static int getImagesInDirectory( char* directory){
+int getImagesInDirectory( char* directory){
     struct dirent* dirent;
     DIR* dir=opendir(directory);
 
@@ -96,7 +96,7 @@ static int getImagesInDirectory( char* directory){
     }
     while((dirent=readdir(dir))!=NULL){
         char* extension=strrchr(dirent->d_name,'.');
-        if(extension!=NULL && strcmp(extension,".bmp"))
+        if(extension!=NULL && strcmp(extension,".bmp")==0)
             n++;
     }
     closedir(dir);
