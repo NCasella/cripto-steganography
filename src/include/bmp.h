@@ -54,6 +54,6 @@ byte* getData(BMPImage bmp);
  * @param image     the bmp image.
  * @return the pixel value or -1 if an error ocurred.
  */
-int getByte(BMPImage image, int row, int column);
+uint8_t getByte(BMPImage image, int index);
 
 #endif //CRIPTO_STEGANOGRAPHY_BMPADT_H

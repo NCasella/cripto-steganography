@@ -87,7 +87,7 @@ BMPImage createBlankImage(uint32_t imageSize, uint32_t headerSize) {
     bmp->header = malloc(headerSize);
     bmp->header->image_size_bytes = imageSize;
     bmp->header->offset = headerSize;
-    bmp->data = malloc(sizeof(byte) * imageSize);
+    bmp->data = calloc(1,sizeof(byte) * imageSize);
     bmp->header->size = imageSize + headerSize;
     return bmp;
 }
@@ -204,7 +204,7 @@ byte* getData(BMPImage bmp) {
     return bmp->data;
 }
 
-int getByte(BMPImage image, int index){
+uint8_t getByte(BMPImage image, int index){
 	byte * data = image->data;
     int width = image->header->width_px;
     int height = image->header->height_px;

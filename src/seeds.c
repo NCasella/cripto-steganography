@@ -23,8 +23,8 @@ void obscureImage(uint16_t width, uint16_t height, BMPImage image, uint16_t toRe
         if(pixel>=0) toReturn = pixel ^ currentChar;       //^ bitwise XOR
 
         currentChar = nextChar();
-        }
     }
+    
 }
 
 void freeMatrix(uint16_t ** matrix){
