@@ -1,6 +1,7 @@
 #include "include/encrypt.h"
 #include "include/bmp.h"
 #include "include/polynomial.h"
+#include "include/seeds.h"
 #include <stdio.h>
 #include <limits.h>
 #include <stdlib.h>
@@ -87,7 +88,7 @@ void decrypt_k8(int width,int height,BMPImage shadows[]){
         }
         getLagrangePolynomialCoefficients(points,k,257,coeffs);
         for(int i=0;i<k;i++){
-            imgData[offset+i]=coeffs[i];
+            imgData[offset+i]=coeffs[i]^nextChar();
         }
     }
     writeImage(revealedImg,"revealedIMG.bmp");
