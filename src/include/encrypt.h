@@ -5,6 +5,6 @@
 
 int compute_polynomial(int shadow, int pol_size, int coefficients[]);
 int create_shadows(uint64_t ** shadows, int n, int shadow_size);
-void encrypt(int r, int n, char * imageName,BMPImage shadows[]);
+void encrypt(int r, int n, BMPImage image,BMPImage shadows[]);
 void decrypt(int r,BMPImage shadows[]);
 #endif

@@ -93,7 +93,7 @@ void getLagrangePolynomialCoefficients(int points[][2],int pointSize,int mod,uin
         p_i[i]=points[i][1];
     }
     for(int i=0;i<pointSize;i++){
-        s_i[i]=getInterpolationValue(p_i,pointSize-i,0,mod);
+        s_i[i]=getInterpolationValue(points,pointSize-i,0,mod);
         for(int j=0;j<pointSize-i-1;j++){
             p_i[j]=(applyMod(s_i[i]-p_i[j],mod)*modInverse(points[j][0],mod))%mod;
         }

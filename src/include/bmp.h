@@ -28,11 +28,19 @@ typedef struct {
 } BMPHeader;
 #pragma pack(pop)
 
+typedef struct BMPImageStruct{
+    BMPHeader* header;
+    byte* data;
+} BMPImageStruct;
+
+
 typedef struct BMPImageStruct* BMPImage;
 
 BMPImage readImage(const char *filename);
 
 BMPImage createBlankImage(uint32_t imageSize, uint32_t headerSize);
+
+BMPImage createImageCopy(BMPImage image);
 
 BMPImage createImageFromData(BMPHeader* header, byte* data, uint32_t size, uint32_t width, uint32_t height);
 

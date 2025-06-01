@@ -8,12 +8,6 @@
 #include <errno.h>
 #include <asm-generic/errno-base.h>
 
-typedef struct BMPImageStruct{
-    BMPHeader* header;
-    byte* data;
-} BMPImageStruct;
-
-
 BMPImage readImage(const char *filename) {
     FILE *imageFile = fopen(filename, "rb");
     if (!imageFile) {
@@ -90,6 +84,10 @@ BMPImage createBlankImage(uint32_t imageSize, uint32_t headerSize) {
     bmp->data = calloc(1,sizeof(byte) * imageSize);
     bmp->header->size = imageSize + headerSize;
     return bmp;
+}
+
+BMPImage createImageCopy(BMPImage image) {
+    return createImageFromData(image->header, image->data, image->header->image_size_bytes, image->header->width_px, image->header->height_px);
 }
 
 BMPImage createImageFromData(BMPHeader* header, byte* data, uint32_t size, uint32_t width, uint32_t height) {

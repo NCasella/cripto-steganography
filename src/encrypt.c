@@ -35,24 +35,19 @@ uint8_t getBitAt(uint8_t num,uint8_t bitPosition);
  
  */
 
-void encrypt(int r, int n, char * imageName,BMPImage shadows[]){
+void encrypt(int r, int n, BMPImage image,BMPImage shadows[]){
     
     //genero n sombras -> n imagenes bmp
     //{puntero_bmp1,  puntero_bmp2, ...}
 
-    BMPImage image = readImage(imageName);
-    BMPHeader header;
-    getHeaderCopy(image, &header);
-    uint16_t obscuredImage[header.height_px * header.width_px];
-    obscureImage(header.width_px, header.height_px, image, obscuredImage);
+    uint16_t obscuredImage[image->header->height_px * image->header->width_px];
+    obscureImage(image->header->width_px, image->header->height_px, image, obscuredImage);
 
-    //BMPPImage shadows[n];
+    //BMPImage shadows_2[n];
 
     if(r == 8){
-        encrypt_k8(n, header.width_px, header.height_px, getData(image) ,shadows);
+        encrypt_k8(n, image->header->width_px, image->header->height_px, image->data ,shadows);
     }
-
-
 
 }
 
@@ -65,11 +60,11 @@ int compute_polynomial(int shadow, int pol_size, int * coefficients){
         result+= (coefficients[i] * partial%257);
     }
     int toReturn = result%257;
-    return toReturn<0? toReturn+257 : toReturn;    
+    return toReturn<0? toReturn+257 : toReturn;
 }
 
-void decrypt_k8(int width,int height,BMPImage shadows[]){
-    BMPImage revealedImg=createBlankImage(width*height, 54);
+void decrypt_k8(int width,int height, BMPImage shadows[]){
+    BMPImage revealedImg=createImageCopy(shadows[0]);
     const int k=8;
     int shadowSize=width*height;
     uint8_t* imgData=getData(revealedImg);
@@ -94,9 +89,14 @@ void decrypt_k8(int width,int height,BMPImage shadows[]){
     writeImage(revealedImg,"revealedIMG.bmp");
 
 }
-void encrypt_k8(int n,int width, int height, uint16_t obscuredImage[width * height],  BMPImage shadows[n]){
+
+void decrypt(int r, BMPImage shadows[]) {
+    decrypt_k8(shadows[0]->header->width_px, shadows[0]->header->height_px, shadows);
+}
+
+void encrypt_k8(int n,int width, int height, const uint8_t obscuredImage[90000],  BMPImage shadows[n]){
     int shadow_size = width * height; //tamaño de las sombras
-    int coefficients[n]; //mod 257
+    int coefficients[8]; //mod 257
     int pol_size = 0;
     int offset = 0;
 
@@ -111,6 +111,7 @@ void encrypt_k8(int n,int width, int height, uint16_t obscuredImage[width * heig
         //creo el j-esimo polinomio
         pol_size=0;
         for(int i=0; i<8; i++){
+            printf("OFFSET: %d\n", offset+i);
             coefficients[i]=obscuredImage[offset+i]; //i-esimo pixel de la seccion j -> coeficiente del polinomio
 
             pol_size++;
