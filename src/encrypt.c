@@ -87,6 +87,7 @@ void decrypt_k8(int width,int height, BMPImage shadows[]){
         }
     }
     writeImage(revealedImg,"revealedIMG.bmp");
+    closeImage(revealedImg);
 
 }
 
