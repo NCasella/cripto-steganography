@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "include/args.h"
+#include "include/bmp.h"
 #include <getopt.h>
 #include <dirent.h>
 #include <sys/stat.h>
@@ -10,7 +11,7 @@
 
 
 
-void parse_args(int argc,char** args, struct args* argStruct){
+void parse_args(int argc,char** args, struct args* argStruct,BMPImage* shadows){
     bool distributeMode=0;
     bool recoverMode=0;
     int k=-1;
@@ -57,7 +58,10 @@ void parse_args(int argc,char** args, struct args* argStruct){
     }
 
     if(n==-1){
-        n=getImagesInDirectory(dirPath);
+        n=getImagesInDirectory(dirPath,shadows);
+    }
+    else {
+        getImagesInDirectory(dirPath,shadows);
     }
     /*   FIXME: descomentar luego de testear 
     if(!(recoverMode ^ distributeMode)){
@@ -76,7 +80,7 @@ void parse_args(int argc,char** args, struct args* argStruct){
         exit(EXIT_FAILURE);
     }
     */
-    argStruct->operation=recoverMode?recoverMode:distributeMode;
+    argStruct->operation=recoverMode?RECOVER:DISTRIBUTE;
     argStruct->imagePath=imagePath;
     argStruct->directoryPath=dirPath;
     argStruct->k=k;
@@ -85,7 +89,7 @@ void parse_args(int argc,char** args, struct args* argStruct){
     return;
 }
 
-int getImagesInDirectory( char* directory){
+int getImagesInDirectory( char* directory,BMPImage* shadows){
     struct dirent* dirent;
     DIR* dir=opendir(directory);
 
@@ -94,10 +98,15 @@ int getImagesInDirectory( char* directory){
         fprintf(stderr,"FATAL: directory does not exist\n");
         exit(EXIT_FAILURE);
     }
+    char buffer[255];
     while((dirent=readdir(dir))!=NULL){
         char* extension=strrchr(dirent->d_name,'.');
-        if(extension!=NULL && strcmp(extension,".bmp")==0)
-            n++;
+        if(extension!=NULL && strcmp(extension,".bmp")==0){
+            strcpy(buffer,directory);
+            strcat(buffer,"/");
+            strcat(buffer,dirent->d_name);
+            shadows[n++]=readImage(buffer);
+        }
     }
     closedir(dir);
     return n;
