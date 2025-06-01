@@ -12,14 +12,14 @@ p(x)=4x^2-5x+6
 polynomial newPolynomial(int* coefficients,int order);
 
 //evalua p(x)
-int evaluatePolynomial(polynomial p,int x);
+uint8_t evaluatePolynomial(polynomial p,uint8_t x);
 
 //multiplica los coeficientes del polinomio p por x, inplace. Devuelve p 
 polynomial multiplyPolynomial(polynomial p ,int x);
 
 void freePolynomial(polynomial p);
 
-void getLagrangePolynomialCoefficients(int points[][2],int pointSize,int mod,uint8_t coefficients[]);
-uint8_t getInterpolationValue(int coefficients[][2],int order,int x,int mod);
+void getLagrangePolynomialCoefficients(uint8_t points[][2],int pointSize,int mod,uint8_t coefficients[]);
+uint8_t getInterpolationValue(uint8_t coefficients[][2],int order,int x,int mod);
 
 #endif 

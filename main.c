@@ -1,5 +1,6 @@
 #include "./src/include/bmp.h"
 #include "./src/include/encrypt.h"
+#include "src/include/polynomial.h"
 #include "src/include/utils.h"
 #include "src/include/args.h"
 #include "src/include/encrypt.h"
@@ -15,17 +16,21 @@ int main(int argc, char **argv) {
     struct args arg;
     BMPImage shadows[10];
     parse_args(argc,argv,&arg,shadows);
-    
-    BMPImage image=readImage(arg.imagePath);
-    if(arg.operation==DISTRIBUTE)
+    BMPImage image;
+    if(arg.operation==DISTRIBUTE){
+        image=readImage(arg.imagePath);
         encrypt(arg.k,arg.n,image,shadows);
+    }
     else if(arg.operation==RECOVER)
-        decrypt(8, shadows);
+        decrypt(arg.k, shadows,arg.n);
 
     for(int i=0; i<10; i++) {
         closeImage(shadows[i]);
     }
-    closeImage(image);
+    if(arg.operation==DISTRIBUTE){
+        closeImage(image);
+    }
     return 0;
+
 
 }

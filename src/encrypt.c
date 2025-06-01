@@ -63,7 +63,14 @@ int compute_polynomial(int shadow, int pol_size, int * coefficients){
     return toReturn<0? toReturn+257 : toReturn;
 }
 
-void decrypt_k8(int width,int height, BMPImage shadows[]){
+int cmp(const void*a ,const void*b){
+    BMPImage ia=(BMPImage)a;
+    BMPImage ib=(BMPImage)b;
+    return (int)(ia->header->shadowNumber-ib->header->shadowNumber);
+}
+
+void decrypt_k8(int width,int height, BMPImage shadows[],int n){
+    qsort(shadows,10,sizeof(BMPImage),cmp);
     BMPImage revealedImg=createImageCopy(shadows[0]);
     const int k=8;
     int shadowSize=width*height;
@@ -71,17 +78,20 @@ void decrypt_k8(int width,int height, BMPImage shadows[]){
     for(int j=0;j<shadowSize/k;j++){
         int offset=j*k;
         uint8_t coeffs[k];
-        int points[k][2];
+        int points[n][2];
+        printf("seccion%d\n",j);
+        for(int shadow=0;shadow<n;shadow++){
+        uint8_t point=0;
         for(int i=0;i<k;i++){
-            uint8_t point=0;
-            for(int shadow=0;shadow<k;shadow++){
-                uint8_t shadowByte=getByte(shadows[shadow],offset+i);
-                point=point<<1|getBitAt(shadowByte,7);//LSB
-            }
-            points[i][0]=i;
-            points[i][1]=point;
+            uint8_t shadowByte=getByte(shadows[shadow],offset+i);
+            point=point<<1|getBitAt(shadowByte,0);//LSB
+            printf("%d\n",point);
+            
         }
-        getLagrangePolynomialCoefficients(points,k,257,coeffs);
+        points[shadow][0]=shadow;
+        points[shadow][1]=point;
+    }
+        getLagrangePolynomialCoefficients(points,n,257,coeffs);
         for(int i=0;i<k;i++){
             imgData[offset+i]=coeffs[i]^nextChar();
         }
@@ -91,8 +101,8 @@ void decrypt_k8(int width,int height, BMPImage shadows[]){
 
 }
 
-void decrypt(int r, BMPImage shadows[]) {
-    decrypt_k8(shadows[0]->header->width_px, shadows[0]->header->height_px, shadows);
+void decrypt(int r, BMPImage shadows[],int n) {
+    decrypt_k8(shadows[0]->header->width_px, shadows[0]->header->height_px, shadows,n);
 }
 
 void encrypt_k8(int n,int width, int height, const uint8_t obscuredImage[90000],  BMPImage shadows[n]){
@@ -149,6 +159,7 @@ void encrypt_k8(int n,int width, int height, const uint8_t obscuredImage[90000],
     for(int i=0;i<n;i++){
         char shadowName[]="shadow .bmp";
         shadowName[6]=i+'0';
+        shadows[i]->header->shadowNumber=i;
         writeImage(shadows[i],shadowName);
     }
 }
