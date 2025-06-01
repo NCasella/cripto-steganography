@@ -1,5 +1,6 @@
 #include "include/encrypt.h"
 #include "include/bmp.h"
+#include "include/polynomial.h"
 #include <stdio.h>
 #include <limits.h>
 #include <stdlib.h>
@@ -66,6 +67,32 @@ int compute_polynomial(int shadow, int pol_size, int * coefficients){
     return toReturn<0? toReturn+257 : toReturn;    
 }
 
+void decrypt_k8(int width,int height,BMPImage shadows[]){
+    BMPImage revealedImg=createBlankImage(width*height, 54);
+    const int k=8;
+    int shadowSize=width*height;
+    uint8_t* imgData=getData(revealedImg);
+    for(int j=0;j<shadowSize/k;j++){
+        int offset=j*k;
+        uint8_t coeffs[k];
+        int points[k][2];
+        for(int i=0;i<k;i++){
+            uint8_t point=0;
+            for(int shadow=0;shadow<k;shadow++){
+                uint8_t shadowByte=getByte(shadows[shadow],offset+i);
+                point=point<<1|getBitAt(shadowByte,7);//LSB
+            }
+            points[i][0]=i;
+            points[i][1]=point;
+        }
+        getLagrangePolynomialCoefficients(points,k,257,coeffs);
+        for(int i=0;i<k;i++){
+            imgData[offset+i]=coeffs[i];
+        }
+    }
+    writeImage(revealedImg,"revealedIMG.bmp");
+
+}
 void encrypt_k8(int n,int width, int height, uint16_t obscuredImage[width * height],  BMPImage shadows[n]){
     int shadow_size = width * height; //tamaño de las sombras
     int coefficients[n]; //mod 257

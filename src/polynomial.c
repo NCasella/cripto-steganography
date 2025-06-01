@@ -3,6 +3,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <string.h>
 
 typedef struct term {
@@ -48,43 +49,6 @@ polynomial multiplyPolynomial(polynomial p, int x){
     return p;
 }
 
-polynomial sumPolynomials(polynomial p1, polynomial p2) {
-
-    polynomial result = NULL;
-    polynomial lastPtr = result;
-
-    while (p1 || p2) {
-        polynomial newNode = malloc(sizeof(term));
-        if (!newNode) {
-            freePolynomial(result);
-            return NULL;
-        }
-
-        if (p1 && (!p2 || p1->order > p2->order)) {
-            newNode->coefficient = p1->coefficient;
-            newNode->order = p1->order;
-            p1 = p1->nextTerm;
-        } else if (p2 && (!p1 || p2->order > p1->order)) {
-            newNode->coefficient = p2->coefficient;
-            newNode->order = p2->order;
-            p2 = p2->nextTerm;
-        } else {
-            newNode->coefficient = p1->coefficient + p2->coefficient;
-            newNode->order = p1->order;
-            p1 = p1->nextTerm;
-            p2 = p2->nextTerm;
-        }
-
-        newNode->nextTerm = NULL;
-        lastPtr = newNode;
-        lastPtr = newNode->nextTerm;
-    }
-    freePolynomial(p1);
-    freePolynomial(p2);
-
-    return result;
-}
-
 int evaluatePolynomial(polynomial p,int x){
     polynomial currentTerm=p;
     int px=0;
@@ -114,7 +78,7 @@ static int modInverse(int a,int mod) {
     return -1;
 }
 
-static int applyMod(int a,int mod){
+static uint8_t applyMod(int a,int mod){
     int result=a;
     if(result<0){
         result+=mod;
@@ -122,26 +86,27 @@ static int applyMod(int a,int mod){
     return result;
 }
 
-polynomial getLagrangePolynomial(int coefficients[][2],int coefficientSize,int mod){
-    int s_i[coefficientSize];
-    int p_i[coefficientSize];
-    for(int i=0;i<coefficientSize;i++){
-        p_i[i]=coefficients[i][1];
+void getLagrangePolynomialCoefficients(int points[][2],int pointSize,int mod,uint8_t coefficients[]){
+    int s_i[pointSize];
+    int p_i[pointSize];
+    for(int i=0;i<pointSize;i++){
+        p_i[i]=points[i][1];
     }
-
-    for(int i=0;i<coefficientSize;i++){
-        s_i[coefficientSize-i-1]=getInterpolationValue(coefficients,coefficientSize-i,0,mod);
-        for(int j=0;j<coefficientSize-i-1;j++){
-            p_i[j]=(applyMod(s_i[coefficientSize-i-1]-p_i[j],mod)*modInverse(coefficients[j][0],mod))%mod;
+    for(int i=0;i<pointSize;i++){
+        s_i[i]=getInterpolationValue(p_i,pointSize-i,0,mod);
+        for(int j=0;j<pointSize-i-1;j++){
+            p_i[j]=(applyMod(s_i[i]-p_i[j],mod)*modInverse(points[j][0],mod))%mod;
         }
     }
-    return newPolynomial(s_i,coefficientSize-1);
+    for(int i=0;i<pointSize;i++){
+        coefficients[i]=s_i[i];
+    }
 
 }
 
 
 
- int getInterpolationValue(int coefficients[][2],int order,int x,int mod){
+uint8_t getInterpolationValue(int coefficients[][2],int order,int x,int mod){
     int result=0;
     for(int i=0;i<order;i++){
         int p=1;

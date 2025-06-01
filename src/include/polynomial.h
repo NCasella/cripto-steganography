@@ -1,3 +1,4 @@
+#include <stdint.h>
 #ifndef POLYNOMIAL_H
 #define POLYNOMIAL_H
 
@@ -18,8 +19,7 @@ polynomial multiplyPolynomial(polynomial p ,int x);
 
 void freePolynomial(polynomial p);
 
-polynomial sumPolynomials(polynomial p1, polynomial p2);
-
-int getInterpolationValue(int coefficients[][2],int order,int x,int mod);
+void getLagrangePolynomialCoefficients(int points[][2],int pointSize,int mod,uint8_t coefficients[]);
+uint8_t getInterpolationValue(int coefficients[][2],int order,int x,int mod);
 
 #endif 
