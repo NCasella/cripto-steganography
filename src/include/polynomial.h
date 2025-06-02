@@ -19,7 +19,6 @@ polynomial multiplyPolynomial(polynomial p ,int x);
 
 void freePolynomial(polynomial p);
 
-void getLagrangePolynomialCoefficients(uint8_t points[][2],int pointSize,int mod,uint8_t coefficients[]);
-uint8_t getInterpolationValue(uint8_t coefficients[][2],int order,int x,int mod);
+void getLagrangePolynomialCoefficients(const uint16_t *x, const uint8_t *y, int pointSize, int mod, uint8_t coefficients[]);
 
 #endif 

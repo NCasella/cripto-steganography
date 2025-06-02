@@ -76,6 +76,8 @@ int cmp(const void *a, const void *b) {
     return ((*ia)->header->shadowNumber - (*ib)->header->shadowNumber);
 }
 
+
+
 void decrypt_k8(int width,int height, BMPImage shadows[],char* imagePath){
     BMPImage revealedImg=createImageCopy(shadows[0]);
     const int k=8;
@@ -85,23 +87,24 @@ void decrypt_k8(int width,int height, BMPImage shadows[],char* imagePath){
     for(int j=0;j<shadowSize/k;j++){
         int offset=j*k;
         uint8_t coeffs[k];
-        uint8_t points[k][2];
+        uint8_t pointsY[k];
+        uint16_t pointsX[k];
         printf("seccion%d\n",j);
         for(int shadow=0;shadow<k;shadow++){
-        uint8_t point=0;
-        printf("shadowak sjfbjaf: %d\n",shadow);
-        for(int i=0;i<k;i++){
-            uint8_t shadowByte=getByte(shadows[shadow],offset+i);
-            point=point<<1|getBitAt(shadowByte,0);//LSB
-            printf("%d",getBitAt(shadowByte,0));
+            uint8_t point=0;
+            printf("shadowak sjfbjaf: %d\n",shadow);
+            for(int i=0;i<k;i++){
+                uint8_t shadowByte=getByte(shadows[shadow],offset+i);
+                point=point<<1|getBitAt(shadowByte,0);//LSB
+                printf("%d",getBitAt(shadowByte,0));
 
+            }
+            printf("\n");
+            printf("%d\n",point);
+            pointsX[shadow]=shadow+1;
+            pointsY[shadow]=point;
         }
-        printf("\n");
-        printf("%d\n",point);
-        points[shadow][0]=shadow+1;
-        points[shadow][1]=point;
-    }
-        getLagrangePolynomialCoefficients(points,k,MOD,coeffs);
+        getLagrangePolynomialCoefficients(pointsX, pointsY, k, MOD, coeffs);
         for(int i=0;i<k;i++){
             imgData[offset+i]=coeffs[i];//^nextChar();
             printf("coefficient %d: %d en hex:%x\n",i,coeffs[i],coeffs[i]);

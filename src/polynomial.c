@@ -14,6 +14,8 @@ typedef struct term {
 
 typedef term* polynomial;
 
+#define MAX_DEGREE 10
+
 
 static polynomial newPolynomialRec(int* coefficients,int order,bool* mallocNulled){
     if(order<0){
@@ -91,41 +93,73 @@ int modInverse(int a, int mod) {
     return t;
 }
 
-static uint8_t applyMod(int a,int mod){
-    int result=a;
-    if(result<0){
-        result+=mod;
-    }
-    uint8_t res= result%mod;
-    return res==mod? res:res;
+int applyMod(int64_t value, int mod) {
+    int result = value % mod;
+    return result < 0 ? result + mod : result;
 }
 
+void polyMultiply(uint8_t* dest, uint8_t* poly, int xj, int mod, int degree) {
+    memset(dest, 0, MAX_DEGREE);
+    for (int i = degree; i >= 0; i--) {
+        // dest[i+1] += -xj * poly[i]
+        dest[i + 1] = applyMod(dest[i + 1] + poly[i], mod);
+        dest[i] = applyMod(dest[i] - xj * poly[i], mod);
+    }
+}
 
-void getLagrangePolynomialCoefficients(uint8_t points[][2],int pointSize,int mod,uint8_t coefficients[]){
-    uint8_t s[pointSize][2];
-    memcpy(s,points,pointSize*2);
-    for(int i=0;i<pointSize;i++){
-        coefficients[i]=getInterpolationValue(s,pointSize-i,0,mod);
-        for(int p=0;p<pointSize-i-1;p++){
-            s[p][1]=applyMod(s[p][1]-coefficients[i],mod)*modInverse(applyMod(s[p][0],mod),mod)%mod;
+void getLagrangePolynomialCoefficients(const uint16_t *x, const uint8_t *y, int pointSize, int mod, uint8_t coefficients[]) {
+    uint16_t matrix[MAX_DEGREE][MAX_DEGREE + 1];
+    memset(coefficients, 0, pointSize);
+
+    for (int i = 0; i < pointSize; i++) {
+        uint16_t xi_pow = 1;
+        for (int j = 0; j < pointSize; j++) {
+            matrix[i][j] = xi_pow;
+            xi_pow = (xi_pow * x[i]) % mod;
         }
+        matrix[i][pointSize] = y[i];
     }
 
-}
-
-
-
-uint8_t getInterpolationValue(uint8_t coefficients[][2],int order,int x,int mod){
-    int result=0;
-    for(int i=0;i<order;i++){
-        int p=1;
-        for (int j=0;j<order;j++){
-            if(j!=i){
-                p=p*applyMod(x-coefficients[j][0],mod)*modInverse(applyMod(coefficients[i][0]-coefficients[j][0],mod),mod)%mod;
+    for (int col = 0; col < pointSize; col++) {
+        int pivot = -1;
+        for (int row = col; row < pointSize; row++) {
+            if (matrix[row][col] != 0) {
+                pivot = row;
+                break;
             }
         }
-        result+=p*coefficients[i][1]%mod;
-    }
-    return applyMod(result,mod);
-}
 
+        if (pivot == -1) {
+            printf("Error: Singular matrix - no pivot found\n");
+            return;
+        }
+
+        if (pivot != col) {
+            for (int j = 0; j <= pointSize; j++) {
+                uint16_t temp = matrix[col][j];
+                matrix[col][j] = matrix[pivot][j];
+                matrix[pivot][j] = temp;
+            }
+        }
+
+        uint16_t inv = modInverse(matrix[col][col], mod);
+        for (int j = col; j <= pointSize; j++) {
+            matrix[col][j] = ((uint32_t)matrix[col][j] * inv) % mod;
+        }
+
+        for (int row = col + 1; row < pointSize; row++) {
+            uint16_t factor = matrix[row][col];
+            for (int j = col; j <= pointSize; j++) {
+                matrix[row][j] = applyMod(matrix[row][j] - factor * matrix[col][j], mod);
+            }
+        }
+    }
+
+    for (int i = pointSize - 1; i >= 0; i--) {
+        int64_t sum = matrix[i][pointSize];
+        for (int j = i + 1; j < pointSize; j++) {
+            sum = applyMod(sum - matrix[i][j] * coefficients[j], mod);
+        }
+        coefficients[i] = applyMod(sum, mod);
+    }
+}
