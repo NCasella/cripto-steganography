@@ -69,13 +69,26 @@ void freePolynomial(polynomial p){
     }
 }
 
-static uint8_t modInverse(int a,int mod) {
-    for (int i = 1; i < mod; i++)
-        if ((a * i) % mod == 1)
-            return i;
-    //printf("my final message, goodbye\n");
-    //*NULL;
-    return -1;
+int modInverse(int a, int mod) {
+    int t = 0, new_t = 1;
+    int r = mod, new_r = a;
+
+    while (new_r != 0) {
+        int quotient = r / new_r;
+        int temp_t = t;
+        t = new_t;
+        new_t = temp_t - quotient * new_t;
+
+        int temp_r = r;
+        r = new_r;
+        new_r = temp_r - quotient * new_r;
+    }
+
+    if (r > 1) {
+        *NULL;
+        return -1;} // Not invertible
+    if (t < 0) t += mod;
+    return t;
 }
 
 static uint8_t applyMod(int a,int mod){
@@ -84,47 +97,17 @@ static uint8_t applyMod(int a,int mod){
         result+=mod;
     }
     uint8_t res= result%mod;
-    return res==mod-1? res-1:res;
+    return res==mod? res:res;
 }
-void polyMultiply(uint8_t result[], uint8_t p[], int xi, int mod, int degree) {
-    uint8_t temp[10] = {0};
-    for (int i = 0; i <= degree; i++) {
-        temp[i + 1] = p[i];
-        temp[i] = (temp[i] - (int64_t)p[i] * xi % mod + mod) % mod;
-    }
-    memcpy(result, temp, sizeof(uint8_t) * (degree + 2));
-}
+
 
 void getLagrangePolynomialCoefficients(uint8_t points[][2],int pointSize,int mod,uint8_t coefficients[]){
-    uint8_t basis[10];
-    uint8_t poly[10];
-    uint8_t temp[10];
-    memset(coefficients,0,pointSize);
-
-    for (int i = 0; i < pointSize; i++) {
-        int xi = points[i][0];
-        int yi = points[i][1];
-        int denom = 1;
-
-        // Initialize basis poly to [1]
-        memset(basis, 0, sizeof(basis));
-        basis[0] = 1;
-        int degree = 0;
-
-        for (int j = 0; j < pointSize; j++) {
-            if (j == i) continue;
-            int xj = points[j][0];
-            denom = (int64_t)denom * (xi - xj + mod) % mod;
-            polyMultiply(temp, basis, xj, mod, degree);
-            degree++;
-            memcpy(basis, temp, sizeof(uint8_t) * (degree + 1));
-        }
-
-        int denomInv = modInverse(denom, mod);
-        for (int k = 0; k <= degree; k++) {
-            int term = (int64_t)basis[k] * yi % mod;
-            term = (int64_t)term * denomInv % mod;
-            coefficients[k] = applyMod(coefficients[k] + term, mod);
+    uint8_t s[pointSize][2];
+    memcpy(s,points,pointSize*2);
+    for(int i=0;i<pointSize;i++){
+        coefficients[i]=getInterpolationValue(s,pointSize-i,0,mod);
+        for(int p=0;p<pointSize-i-1;p++){
+            s[p][1]=applyMod(s[p][1]-coefficients[i],mod)*modInverse(applyMod(s[p][0],mod),mod)%mod;
         }
     }
 
@@ -138,10 +121,10 @@ uint8_t getInterpolationValue(uint8_t coefficients[][2],int order,int x,int mod)
         int p=1;
         for (int j=0;j<order;j++){
             if(j!=i){
-                p=p*applyMod(x-coefficients[j][0],mod)*modInverse(coefficients[i][0]-coefficients[j][0],mod);
+                p=p*applyMod(x-coefficients[j][0],mod)*modInverse(applyMod(coefficients[i][0]-coefficients[j][0],mod),mod)%mod;
             }
         }
-        result+=p*coefficients[i][1];
+        result+=p*coefficients[i][1]%mod;
     }
     return applyMod(result,mod);
 }
