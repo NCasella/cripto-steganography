@@ -12,7 +12,6 @@
 #define MOD 257
 /*variable global*/
 
-int create_shadows(uint64_t ** shadows, int n, int shadow_size);
 uint8_t getBitAt(uint8_t num,uint8_t bitPosition);
 /*Forma de distribuir una foto en N sombras*/
 
@@ -34,7 +33,13 @@ uint8_t getBitAt(uint8_t num,uint8_t bitPosition);
     -USAMOS N!!!!!!
  
  */
-
+static int intPowMod(int base, int exp) {
+    long long acc = 1;
+   for(int i=0;i<exp;i++){
+    acc*=base%MOD;
+   }
+   return acc%MOD;
+}
 void encrypt(int r, int n, BMPImage image,BMPImage shadows[]){
     
     //genero n sombras -> n imagenes bmp
@@ -51,12 +56,12 @@ void encrypt(int r, int n, BMPImage image,BMPImage shadows[]){
 
 }
 
-int compute_polynomial(int shadow, int pol_size, int * coefficients,int* flag){
+int compute_polynomial(int shadow, int pol_size, uint8_t * coefficients,int* flag){
     int result=0;
     long long unsigned int partial = 0;
     for(int i=0; i<pol_size; i++){
         //caso especial p(i)=256
-        partial = pow(shadow,i);
+        partial = intPowMod(shadow,i);
         result+= (coefficients[i] * partial%MOD);
     }
     int toReturn = result%MOD;
@@ -113,7 +118,7 @@ void decrypt(int r, BMPImage shadows[],char* imagePath) {
 
 void encrypt_k8(int n,int width, int height, const uint8_t obscuredImage[],  BMPImage shadows[n]){
     int shadow_size = width * height; //tamaño de las sombras
-    int coefficients[8]; //mod 257
+    uint8_t coefficients[8]; //mod 257
     int pol_size = 0;
     int offset = 0;
 
@@ -135,7 +140,7 @@ void encrypt_k8(int n,int width, int height, const uint8_t obscuredImage[],  BMP
         }
         printf("Current poly:");
         for(int m=0; m<pol_size;m++){
-            printf("+%dx^%d", coefficients[m], m);
+            printf("+% x^%d", coefficients[m], m);
         }
         printf("\n");
         for(int k=1; k<=n; k++){
@@ -158,11 +163,11 @@ void encrypt_k8(int n,int width, int height, const uint8_t obscuredImage[],  BMP
                 for(int i=0;i<8;i++){
                     if(coefficients[i]!=0){
                         coefficients[i]--;
-                        shadow=0;
+                        shadow=-1;
                         break;//resetear el for 
                     }
-                    continue;
                 }
+                continue;
             }
             p_xi[shadow]=p_x;
         }
