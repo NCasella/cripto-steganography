@@ -69,18 +69,18 @@ int cmp(const void*a ,const void*b){
     return (int)(ia->header->shadowNumber-ib->header->shadowNumber);
 }
 
-void decrypt_k8(int width,int height, BMPImage shadows[],int n){
-    qsort(shadows,10,sizeof(BMPImage),cmp);
+void decrypt_k8(int width,int height, BMPImage shadows[]){
     BMPImage revealedImg=createImageCopy(shadows[0]);
     const int k=8;
+    qsort(shadows,k,sizeof(BMPImage),cmp);
     int shadowSize=width*height;
     uint8_t* imgData=getData(revealedImg);
     for(int j=0;j<shadowSize/k;j++){
         int offset=j*k;
         uint8_t coeffs[k];
-        int points[n][2];
+        int points[k][2];
         printf("seccion%d\n",j);
-        for(int shadow=0;shadow<n;shadow++){
+        for(int shadow=0;shadow<k;shadow++){
         uint8_t point=0;
         for(int i=0;i<k;i++){
             uint8_t shadowByte=getByte(shadows[shadow],offset+i);
@@ -91,7 +91,7 @@ void decrypt_k8(int width,int height, BMPImage shadows[],int n){
         points[shadow][0]=shadow;
         points[shadow][1]=point;
     }
-        getLagrangePolynomialCoefficients(points,n,257,coeffs);
+        getLagrangePolynomialCoefficients(points,k,257,coeffs);
         for(int i=0;i<k;i++){
             imgData[offset+i]=coeffs[i]^nextChar();
         }
@@ -101,8 +101,8 @@ void decrypt_k8(int width,int height, BMPImage shadows[],int n){
 
 }
 
-void decrypt(int r, BMPImage shadows[],int n) {
-    decrypt_k8(shadows[0]->header->width_px, shadows[0]->header->height_px, shadows,n);
+void decrypt(int r, BMPImage shadows[]) {
+    decrypt_k8(shadows[0]->header->width_px, shadows[0]->header->height_px, shadows);
 }
 
 void encrypt_k8(int n,int width, int height, const uint8_t obscuredImage[90000],  BMPImage shadows[n]){
@@ -156,7 +156,7 @@ void encrypt_k8(int n,int width, int height, const uint8_t obscuredImage[90000],
             }
         }
     }
-    for(int i=0;i<n;i++){
+    for(uint16_t i=0;i<n;i++){
         char shadowName[]="shadow .bmp";
         shadowName[6]=i+'0';
         shadows[i]->header->shadowNumber=i;

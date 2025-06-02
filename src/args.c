@@ -57,12 +57,8 @@ void parse_args(int argc,char** args, struct args* argStruct,BMPImage* shadows){
         }
     }
 
-    if(n==-1){
-        n=getImagesInDirectory(dirPath,shadows);
-    }
-    else {
-        getImagesInDirectory(dirPath,shadows);
-    }
+
+    
     /*   FIXME: descomentar luego de testear 
     if(!(recoverMode ^ distributeMode)){
         fprintf(stderr,"FATAL: either -d OR -r must be specified\n");
@@ -71,16 +67,21 @@ void parse_args(int argc,char** args, struct args* argStruct,BMPImage* shadows){
     if(k<2||k>10){
         fprintf(stderr,"FATAL: invalid k value\n");
         exit(EXIT_FAILURE);
-    }
-    if(distributeMode && n<2){
-        fprintf(stderr,"FATAL: not enough images found on directory %s \n",dirPath);
-    }
-    if(distributeMode && k>n){
-        fprintf(stderr,"FATAL: k greater than n value\n");
+        }
+        if(distributeMode && n<2){
+            fprintf(stderr,"FATAL: not enough images found on directory %s \n",dirPath);
+            }
+            if(distributeMode && k>n){
+                fprintf(stderr,"FATAL: k greater than n value\n");
+                exit(EXIT_FAILURE);
+                }
+                */
+    argStruct->operation=recoverMode?RECOVER:DISTRIBUTE;
+    n=getImagesInDirectory(dirPath,shadows,argStruct->operation,n,k);
+    if(n==-1){
+        fprintf(stderr,"FATAL: not enough files for operaation\n");
         exit(EXIT_FAILURE);
     }
-    */
-    argStruct->operation=recoverMode?RECOVER:DISTRIBUTE;
     argStruct->imagePath=imagePath;
     argStruct->directoryPath=dirPath;
     argStruct->k=k;
@@ -89,11 +90,12 @@ void parse_args(int argc,char** args, struct args* argStruct,BMPImage* shadows){
     return;
 }
 
-int getImagesInDirectory( char* directory,BMPImage* shadows){
+
+int getImagesInDirectory( char* directory,BMPImage* shadows,operationType op,int n,int k){
     struct dirent* dirent;
     DIR* dir=opendir(directory);
-
-    int n=0;
+    int filesNeeded=k;
+    int filesInDir=0;
     if(dir==NULL){
         fprintf(stderr,"FATAL: directory does not exist\n");
         exit(EXIT_FAILURE);
@@ -105,9 +107,14 @@ int getImagesInDirectory( char* directory,BMPImage* shadows){
             strcpy(buffer,directory);
             strcat(buffer,"/");
             strcat(buffer,dirent->d_name);
-            shadows[n++]=readImage(buffer);
+            shadows[filesInDir++]=readImage(buffer);
+            filesNeeded--;
+            if((op==RECOVER && filesNeeded==0)|| (op==DISTRIBUTE && n!=-1&&filesInDir==n))
+               break;
         }
     }
     closedir(dir);
-    return n;
+    if((op==RECOVER && k!=filesInDir)||(op==DISTRIBUTE && filesInDir!=n))
+        return -1;
+    return filesInDir;
 }

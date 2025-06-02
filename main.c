@@ -3,6 +3,7 @@
 #include "src/include/polynomial.h"
 #include "src/include/utils.h"
 #include "src/include/args.h"
+#include "src/include/seeds.h"
 #include "src/include/encrypt.h"
 #include <stdio.h>
 #include <stdbool.h>
@@ -22,9 +23,9 @@ int main(int argc, char **argv) {
         encrypt(arg.k,arg.n,image,shadows);
     }
     else if(arg.operation==RECOVER)
-        decrypt(arg.k, shadows,arg.n);
+        decrypt(arg.k, shadows);
 
-    for(int i=0; i<10; i++) {
+    for(int i=0; i<arg.n; i++) {
         closeImage(shadows[i]);
     }
     if(arg.operation==DISTRIBUTE){
