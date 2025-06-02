@@ -19,7 +19,7 @@ uint8_t nextChar(void);
  * @param image     the bmp image.
  * @return a matrix of pixels.
  */
-void obscureImage(uint16_t width, uint16_t height, BMPImage image, uint16_t toReturn[width*height]);
+void obscureImage(uint16_t width, uint16_t height, BMPImage image, uint8_t toReturn[width*height]);
 void freeMatrix(uint16_t ** matrix);
 
 #endif /* SEEDS_H */

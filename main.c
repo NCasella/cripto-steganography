@@ -23,7 +23,8 @@ int main(int argc, char **argv) {
         encrypt(arg.k,arg.n,image,shadows);
     }
     else if(arg.operation==RECOVER)
-        decrypt(arg.k, shadows);
+    
+        decrypt(arg.k, shadows,arg.imagePath);
 
     for(int i=0; i<arg.n; i++) {
         closeImage(shadows[i]);

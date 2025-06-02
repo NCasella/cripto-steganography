@@ -9,7 +9,7 @@
 #include <strings.h>
 #include <string.h>
 
-
+int getImagesInDirectory( char* directory,BMPImage* shadows,operationType op,int n,int k);
 
 void parse_args(int argc,char** args, struct args* argStruct,BMPImage* shadows){
     bool distributeMode=0;

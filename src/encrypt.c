@@ -9,9 +9,9 @@
 #include <math.h>
 #define MAX 50
 #define SET 10
+#define MOD 257
 /*variable global*/
 
-int compute_polynomial(int shadow, int pol_size, int coefficients[]);
 int create_shadows(uint64_t ** shadows, int n, int shadow_size);
 uint8_t getBitAt(uint8_t num,uint8_t bitPosition);
 /*Forma de distribuir una foto en N sombras*/
@@ -40,36 +40,38 @@ void encrypt(int r, int n, BMPImage image,BMPImage shadows[]){
     //genero n sombras -> n imagenes bmp
     //{puntero_bmp1,  puntero_bmp2, ...}
 
-    uint16_t obscuredImage[image->header->height_px * image->header->width_px];
+    uint8_t obscuredImage[image->header->height_px * image->header->width_px];
     obscureImage(image->header->width_px, image->header->height_px, image, obscuredImage);
 
     //BMPImage shadows_2[n];
 
     if(r == 8){
-        encrypt_k8(n, image->header->width_px, image->header->height_px, image->data ,shadows);
+        encrypt_k8(n, image->header->width_px, image->header->height_px, obscuredImage ,shadows);
     }
 
 }
 
-int compute_polynomial(int shadow, int pol_size, int * coefficients){
+int compute_polynomial(int shadow, int pol_size, int * coefficients,int* flag){
     int result=0;
     long long unsigned int partial = 0;
     for(int i=0; i<pol_size; i++){
         //caso especial p(i)=256
         partial = pow(shadow,i);
-        result+= (coefficients[i] * partial%257);
+        result+= (coefficients[i] * partial%MOD);
     }
-    int toReturn = result%257;
-    return toReturn<0? toReturn+257 : toReturn;
+    int toReturn = result%MOD;
+    if(toReturn==MOD-1)
+        *flag=1;
+    return toReturn<0? toReturn+MOD : toReturn;
 }
 
-int cmp(const void*a ,const void*b){
-    BMPImage ia=(BMPImage)a;
-    BMPImage ib=(BMPImage)b;
-    return (int)(ia->header->shadowNumber-ib->header->shadowNumber);
+int cmp(const void *a, const void *b) {
+    const BMPImage *ia = (const BMPImage *)a;
+    const BMPImage *ib = (const BMPImage *)b;
+    return ((*ia)->header->shadowNumber - (*ib)->header->shadowNumber);
 }
 
-void decrypt_k8(int width,int height, BMPImage shadows[]){
+void decrypt_k8(int width,int height, BMPImage shadows[],char* imagePath){
     BMPImage revealedImg=createImageCopy(shadows[0]);
     const int k=8;
     qsort(shadows,k,sizeof(BMPImage),cmp);
@@ -78,34 +80,38 @@ void decrypt_k8(int width,int height, BMPImage shadows[]){
     for(int j=0;j<shadowSize/k;j++){
         int offset=j*k;
         uint8_t coeffs[k];
-        int points[k][2];
+        uint8_t points[k][2];
         printf("seccion%d\n",j);
         for(int shadow=0;shadow<k;shadow++){
         uint8_t point=0;
+        printf("shadowak sjfbjaf: %d\n",shadow);
         for(int i=0;i<k;i++){
             uint8_t shadowByte=getByte(shadows[shadow],offset+i);
             point=point<<1|getBitAt(shadowByte,0);//LSB
-            printf("%d\n",point);
-            
+            printf("%d",getBitAt(shadowByte,0));
+
         }
-        points[shadow][0]=shadow;
+        printf("\n");
+        printf("%d\n",point);
+        points[shadow][0]=shadow+1;
         points[shadow][1]=point;
     }
-        getLagrangePolynomialCoefficients(points,k,257,coeffs);
+        getLagrangePolynomialCoefficients(points,k,MOD,coeffs);
         for(int i=0;i<k;i++){
-            imgData[offset+i]=coeffs[i]^nextChar();
+            imgData[offset+i]=coeffs[i];//^nextChar();
+            printf("coefficient %d: %d en hex:%x\n",i,coeffs[i],coeffs[i]);
         }
     }
-    writeImage(revealedImg,"revealedIMG.bmp");
+    writeImage(revealedImg,imagePath);
     closeImage(revealedImg);
 
 }
 
-void decrypt(int r, BMPImage shadows[]) {
-    decrypt_k8(shadows[0]->header->width_px, shadows[0]->header->height_px, shadows);
+void decrypt(int r, BMPImage shadows[],char* imagePath) {
+    decrypt_k8(shadows[0]->header->width_px, shadows[0]->header->height_px, shadows,imagePath);
 }
 
-void encrypt_k8(int n,int width, int height, const uint8_t obscuredImage[90000],  BMPImage shadows[n]){
+void encrypt_k8(int n,int width, int height, const uint8_t obscuredImage[],  BMPImage shadows[n]){
     int shadow_size = width * height; //tamaño de las sombras
     int coefficients[8]; //mod 257
     int pol_size = 0;
@@ -133,7 +139,8 @@ void encrypt_k8(int n,int width, int height, const uint8_t obscuredImage[90000],
         }
         printf("\n");
         for(int k=1; k<=n; k++){
-            printf("p(%d)=%d\n", k, compute_polynomial(k, pol_size,coefficients));
+            int flag=0;
+            printf("p(%d)=%d\n", k, compute_polynomial(k, pol_size,coefficients,&flag));
             //piso el j-esimo bit en la k-esima shadow
             //shadows[k-1][j] = compute_polynomial(k, coefficients);
         }
@@ -143,15 +150,28 @@ void encrypt_k8(int n,int width, int height, const uint8_t obscuredImage[90000],
         para cada S_num hago
         -> S_num[j][LSB] = qj[]
         */
+       uint8_t p_xi[n];
         for(int shadow=0; shadow<n; shadow++){
-            uint8_t p_x = compute_polynomial(shadow+1, 8,coefficients);
+            int flag256=0;
+            uint8_t p_x = compute_polynomial(shadow+1, 8,coefficients,&flag256);
+            if(flag256){
+                for(int i=0;i<8;i++){
+                    if(coefficients[i]!=0){
+                        coefficients[i]--;
+                        shadow=0;
+                        break;//resetear el for 
+                    }
+                    continue;
+                }
+            }
+            p_xi[shadow]=p_x;
+        }
+        for(int shadow=0;shadow<n;shadow++){
             uint8_t* shadowData=getData(shadows[shadow]);
             uint8_t result;
-            
             for(uint8_t bit=0; bit<8; bit++){
-                
-                uint8_t b=getBitAt(p_x,bit);
-                result=( shadowData[offset+bit] & 0xFe)|b; //cambio LS
+                uint8_t b=getBitAt(p_xi[shadow],8-bit-1);
+                result=(shadowData[offset+bit] & 0xFe)|b; //cambio LS
                 shadowData[offset+bit]=result;
             }
         }
