@@ -20,18 +20,19 @@ void parse_args(int argc,char** args, struct args* argStruct,BMPImage* shadows){
     char* dirPath=".";
 
     static struct option long_opts[]={
-        {"decode",no_argument, NULL,'d'},
+        {"distribute",no_argument, NULL,'d'},
         {"recover", no_argument, NULL,'r'},
         {"k",required_argument, NULL,'k'},
         {"n",required_argument, NULL,'n'},
         {"secret",required_argument, NULL, 0xaffa},
-        {"dir",required_argument, NULL, 0xcafe}};
+        {"dir",required_argument, NULL, 0xcafe},
+        {"help",no_argument,NULL,'h'}};
     
     int opt;
     int optIndex;
 
 
-    while ((opt=getopt_long(argc,args,"drk:n:",long_opts,&optIndex))!=-1){
+    while ((opt=getopt_long(argc,args,"drk:n:h",long_opts,&optIndex))!=-1){
         switch (opt){
         case 'd':
             distributeMode=true;
@@ -51,6 +52,16 @@ void parse_args(int argc,char** args, struct args* argStruct,BMPImage* shadows){
         case 0xcafe:
             dirPath=optarg;
             break;
+        case 'h':
+            printf("-d --decode        use distribute mode\n"
+                    "-r --recover       use recover mode\n"
+                    "-k <number>   minimum treshold\n"
+                    "-n <number>   amount of files for\n"
+                    "--secret <path>    path to image to distribute (if -d) or output path of recovered image (if -r)\n"
+                    "--dir <path>   path to look for images\n"
+                    "\n");
+            exit(EXIT_SUCCESS);
+                
         default:
             fprintf(stderr,"FATAL: unknown argument %c\n",optopt);
             exit(EXIT_FAILURE);
