@@ -70,18 +70,12 @@ int compute_polynomial(int shadow, int pol_size, uint8_t * coefficients,int* fla
     return toReturn<0? toReturn+MOD : toReturn;
 }
 
-int cmp(const void *a, const void *b) {
-    const BMPImage *ia = (const BMPImage *)a;
-    const BMPImage *ib = (const BMPImage *)b;
-    return ((*ia)->header->shadowNumber - (*ib)->header->shadowNumber);
-}
 
 
 
 void decrypt_k8(int width,int height, BMPImage shadows[],char* imagePath){
     BMPImage revealedImg=createImageCopy(shadows[0]);
     const int k=8;
-    qsort(shadows,k,sizeof(BMPImage),cmp);
     int shadowSize=width*height;
     uint8_t* imgData=getData(revealedImg);
     for(int j=0;j<shadowSize/k;j++){
@@ -101,7 +95,7 @@ void decrypt_k8(int width,int height, BMPImage shadows[],char* imagePath){
             }
             printf("\n");
             printf("%d\n",point);
-            pointsX[shadow]=shadow+1;
+            pointsX[shadow]=shadows[shadow]->header->shadowNumber+1;
             pointsY[shadow]=point;
         }
         getLagrangePolynomialCoefficients(pointsX, pointsY, k, MOD, coeffs);
