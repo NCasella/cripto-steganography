@@ -20,7 +20,7 @@ void obscureImage(uint16_t width, uint16_t height, BMPImage image, uint8_t toRet
 
    for(int i=0; i< (height * width); i++){
         pixel = getByte(image, i);
-        if(pixel>=0)toReturn[i] = pixel;// ^ currentChar;       //^ bitwise XOR
+        if(pixel>=0)toReturn[i] = pixel ^ currentChar;       //^ bitwise XOR
         else 
             *NULL;
 

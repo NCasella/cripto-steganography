@@ -100,7 +100,7 @@ void decrypt_k8(int width,int height, BMPImage shadows[],char* imagePath){
         }
         getLagrangePolynomialCoefficients(pointsX, pointsY, k, MOD, coeffs);
         for(int i=0;i<k;i++){
-            imgData[offset+i]=coeffs[i];//^nextChar();
+            imgData[offset+i]=coeffs[i]^nextChar();
             printf("coefficient %d: %d en hex:%x\n",i,coeffs[i],coeffs[i]);
         }
     }
