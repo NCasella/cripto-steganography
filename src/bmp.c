@@ -91,10 +91,11 @@ BMPImage createImageCopy(BMPImage image) {
 }
 
 BMPImage createImageFromData(BMPHeader* header, byte* data, uint32_t size, uint32_t width, uint32_t height) {
-    BMPImage bmp = malloc(sizeof(BMPImageStruct));
-    bmp->header = malloc(header->offset);
-    bmp->data = malloc(sizeof(byte) * size);
-    memcpy(bmp->data, data, size);
+    BMPImage bmp = calloc(1, sizeof(BMPImageStruct));
+    bmp->header = calloc(1, header->offset);
+    bmp->data = calloc(1, sizeof(byte) * size);
+    size_t copySize = (header->image_size_bytes > size) ? size : header->image_size_bytes;
+    memcpy(bmp->data, data, copySize);
     memcpy(bmp->header, header, header->offset);
     bmp->header->image_size_bytes = size;
     bmp->header->size = size + header->offset;
@@ -103,6 +104,7 @@ BMPImage createImageFromData(BMPHeader* header, byte* data, uint32_t size, uint3
 
     return bmp;
 }
+
 
 int _mkdirs(const char *path) {
     char tmp[1024];
@@ -191,7 +193,7 @@ void closeImage(BMPImage bmp) {
 }
 
 void getHeaderCopy(BMPImage bmp, BMPHeader* toCopy) {
-    memcpy(toCopy, bmp->header, HEADER_SIZE);
+    memcpy(toCopy, bmp->header, bmp->header->offset);
 }
 
 uint32_t getHeaderSize(BMPImage bmp) {
