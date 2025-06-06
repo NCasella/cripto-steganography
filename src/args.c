@@ -146,14 +146,26 @@ int getImagesInDirectory( char* directory,BMPImage* shadows,operationType op,int
             strcpy(buffer,directory);
             strcat(buffer,"/");
             strcat(buffer,dirent->d_name);
-            shadows[filesInDir++]=readImage(buffer);
+            shadows[filesInDir]=readImage(buffer);
+            if(shadows[filesInDir]==NULL){
+                closedir(dir);
+                goto fileError;
+            }
+            filesInDir++;
             filesNeeded--;
             if((op==RECOVER && filesNeeded==0)|| (op==DISTRIBUTE && n!=-1&&filesInDir==n))
                break;
         }
     }
     closedir(dir);
-    if((op==RECOVER && k!=filesInDir)||(op==DISTRIBUTE && filesInDir!=n))
-        return -1;
+    if((op==RECOVER && k!=filesInDir)||(op==DISTRIBUTE && filesInDir!=n)){
+        fileError:
+        fprintf(stderr,"FATAL: something went wrong reading a .bmp file\n");
+        for(int i=0;i<filesInDir;i++){
+            closeImage(shadows[i]);
+        }
+        
+        exit(EXIT_FAILURE);
+    }
     return filesInDir;
 }
