@@ -149,6 +149,7 @@ int getImagesInDirectory( char* directory,BMPImage* shadows,operationType op,int
             shadows[filesInDir]=readImage(buffer);
             if(shadows[filesInDir]==NULL){
                 closedir(dir);
+                fprintf(stderr,"FATAL: something went wrong reading a .bmp file\n");
                 goto fileError;
             }
             filesInDir++;
@@ -159,8 +160,8 @@ int getImagesInDirectory( char* directory,BMPImage* shadows,operationType op,int
     }
     closedir(dir);
     if((op==RECOVER && k!=filesInDir)||(op==DISTRIBUTE && filesInDir!=n)){
+        fprintf(stderr,"Not enough files for image reveal");
         fileError:
-        fprintf(stderr,"FATAL: something went wrong reading a .bmp file\n");
         for(int i=0;i<filesInDir;i++){
             closeImage(shadows[i]);
         }
