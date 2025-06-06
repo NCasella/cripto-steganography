@@ -1,7 +1,7 @@
 #include "seeds.h"
 #include "include/bmp.h"
 
-uint64_t seed;
+int64_t seed;
 
 void
 setSeed(int64_t s)
@@ -13,6 +13,9 @@ nextChar(void){
 seed = (seed * 0x5DEECE66DL + 0xBL) & ((1LL << 48) - 1);
 return (uint8_t)(seed>>40);
 }
+uint16_t getSeed(){
+    return seed;
+}
 
 void obscureImage(uint16_t width, uint16_t height, BMPImage image, uint8_t toReturn[width*height]) {
     uint8_t currentChar = nextChar();
@@ -20,7 +23,7 @@ void obscureImage(uint16_t width, uint16_t height, BMPImage image, uint8_t toRet
 
    for(int i=0; i< (height * width); i++){
         pixel = getByte(image, i);
-        if(pixel>=0)toReturn[i] = pixel; //^ currentChar;       //^ bitwise XOR
+        if(pixel>=0)toReturn[i] = pixel ^ currentChar;       //^ bitwise XOR
         else 
             *NULL;
 

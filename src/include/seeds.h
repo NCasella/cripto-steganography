@@ -8,7 +8,7 @@
 
 void setSeed(int64_t s);
 uint8_t nextChar(void);
-
+uint16_t getSeed();
 /**
  * Creates an encrypted matrix of pixels given a bmp image.
  * This function assumes a correct seed inicialization.

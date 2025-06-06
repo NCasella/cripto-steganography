@@ -48,7 +48,9 @@ void encrypt(int r, int n, BMPImage image,BMPImage shadows[]){
     
     //genero n sombras -> n imagenes bmp
     //{puntero_bmp1,  puntero_bmp2, ...}
-
+    for(int i=0;i<n;i++){
+        shadows[i]->header->seed=getSeed();
+    }
     uint8_t obscuredImage[image->header->height_px * image->header->width_px];
     obscureImage(image->header->width_px, image->header->height_px, image, obscuredImage);
 
@@ -112,7 +114,7 @@ void decrypt_k8(int k,int width,int height, BMPImage shadows[],char* imagePath){
         bitOffset += 8;
         getLagrangePolynomialCoefficients(pointsX, pointsY, k, MOD, coeffs);
         for(int i=0;i<k;i++){
-            imgData[offset+i]=coeffs[i];//^nextChar();
+            imgData[offset+i]=coeffs[i]^nextChar();
             printf("coefficient %d: %d en hex:%x\n",i,coeffs[i],coeffs[i]);
         }
     }
