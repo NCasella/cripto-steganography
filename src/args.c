@@ -4,6 +4,7 @@
 #include "include/bmp.h"
 #include <getopt.h>
 #include <dirent.h>
+#include "include/bmp.h"
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <strings.h>
@@ -93,12 +94,39 @@ void parse_args(int argc,char** args, struct args* argStruct,BMPImage* shadows){
         fprintf(stderr,"FATAL: not enough files for operaation\n");
         exit(EXIT_FAILURE);
     }
+    if(argStruct->operation==DISTRIBUTE){
+     int ratios[] = {0,0,2,2,2,2,2,2,1,1,1};
+
+
+    int ratio = ratios[k];
+    BMPImage image=readImage(imagePath);
+    if(image==NULL){
+        fprintf(stderr,"FILE NON EXISTENT\n");
+        goto freeImgs;
+    }
+    uint32_t shadowHeight=image->header->height_px*ratio;
+    uint32_t shadowWidth=image->header->width_px*ratio;
+    uint32_t shadowSize = shadowHeight*shadowWidth;
+    char name[] = "chorizo .bmp";
+    closeImage(image);
+    for (int i=0; i<n; i++) {
+        BMPImage aux=createImageFromData(shadows[i]->header, shadows[i]->data, shadowSize, shadowWidth, shadowHeight);
+        closeImage(shadows[i]);
+        shadows[i]=aux;
+        name[7] = '0'+i;
+        writeImage(shadows[i], name);
+        }
+    }
     argStruct->imagePath=imagePath;
     argStruct->directoryPath=dirPath;
     argStruct->k=k;
     argStruct->n=n;
-
     return;
+    freeImgs:
+    for(int i=0;i<n;i++){
+        closeImage(shadows[i]);
+    }
+    exit(EXIT_FAILURE);
 }
 
 
