@@ -68,10 +68,7 @@ void parse_args(int argc,char** args, struct args* argStruct,BMPImage* shadows){
             exit(EXIT_FAILURE);
         }
     }
-
-
-    
-    /*   FIXME: descomentar luego de testear 
+ 
     if(!(recoverMode ^ distributeMode)){
         fprintf(stderr,"FATAL: either -d OR -r must be specified\n");
         exit(EXIT_FAILURE);
@@ -79,15 +76,15 @@ void parse_args(int argc,char** args, struct args* argStruct,BMPImage* shadows){
     if(k<2||k>10){
         fprintf(stderr,"FATAL: invalid k value\n");
         exit(EXIT_FAILURE);
-        }
-        if(distributeMode && n<2){
-            fprintf(stderr,"FATAL: not enough images found on directory %s \n",dirPath);
-            }
-            if(distributeMode && k>n){
-                fprintf(stderr,"FATAL: k greater than n value\n");
-                exit(EXIT_FAILURE);
-                }
-                */
+    }
+    if(distributeMode && n<2){
+        fprintf(stderr,"FATAL: not enough images found on directory %s \n",dirPath);
+    }
+    if(distributeMode && k>n){
+        fprintf(stderr,"FATAL: k greater than n value\n");
+        exit(EXIT_FAILURE);
+    }
+                
     argStruct->operation=recoverMode?RECOVER:DISTRIBUTE;
     n=getImagesInDirectory(dirPath,shadows,argStruct->operation,n,k);
     if(n==-1){
