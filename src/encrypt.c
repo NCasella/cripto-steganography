@@ -15,6 +15,8 @@
 /*variable global*/
 
 int ratios[] = {0,0,2,2,2,2,2,2,1,1,1};
+int checkShadowSize(int r, int n, BMPImage shadows[], int imageSize);
+void encryptProcess(int n,int k, int width, int height, const uint8_t obscuredImage[], BMPImage shadows[n]);
 
 uint8_t getBitAt(uint8_t num,uint8_t bitPosition);
 /*Forma de distribuir una foto en N sombras*/
