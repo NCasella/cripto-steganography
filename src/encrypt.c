@@ -88,7 +88,7 @@ int compute_polynomial(int shadow, int polSize, uint8_t * coefficients,int* flag
 void decrypt_k8(int k,int width,int height, BMPImage shadows[],char* imagePath){
     BMPHeader * header = malloc(shadows[0]->header->offset);
     getHeaderCopy(shadows[0],header);
-    BMPImage revealedImg=createImageFromData(header, shadows[0]->data, width * height, width, height);
+    BMPImage revealedImg=createImageFromData(header, shadows[0]->data, width, height);
     free(header);
     int shadowSize=width*height;
     uint8_t* imgData=getData(revealedImg);
@@ -130,7 +130,6 @@ void decrypt(int r, BMPImage shadows[],char* imagePath) {
 }
 
 void encryptProcess(int n,int k, int width, int height, const uint8_t obscuredImage[], BMPImage shadows[n]){
-    int shadowSize = ratios[k] * ratios[k] * width * height; //tamaño de las sombras
     uint8_t coefficients[k]; //mod 257
     int polSize = 0;
     int offset = 0;

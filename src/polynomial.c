@@ -25,7 +25,6 @@ static int modInverse(int a, int mod) {
     }
 
     if (r > 1) {
-        *NULL;
         return -1;} // Not invertible
     if (t < 0) t += mod;
     return t;

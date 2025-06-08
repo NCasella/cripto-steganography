@@ -87,10 +87,10 @@ BMPImage createBlankImage(uint32_t imageSize, uint32_t headerSize) {
 }
 
 BMPImage createImageCopy(BMPImage image) {
-    return createImageFromData(image->header, image->data, image->header->image_size_bytes, image->header->width_px, image->header->height_px);
+    return createImageFromData(image->header, image->data, image->header->width_px, image->header->height_px);
 }
 
-BMPImage createImageFromData(BMPHeader* header, byte* data, int32_t size, int32_t width, int32_t height) {
+BMPImage createImageFromData(BMPHeader* header, byte* data, int32_t width, int32_t height) {
     BMPImage bmp = calloc(1, sizeof(BMPImageStruct));
 
     bmp->header = calloc(1, header->offset);
@@ -100,7 +100,7 @@ BMPImage createImageFromData(BMPHeader* header, byte* data, int32_t size, int32_
     int row_bytes_unpadded = width * bytes_per_pixel;
 
     int row_bytes_padded = (row_bytes_unpadded + 3) & ~3;
-    int padded_image_size = row_bytes_padded * height;
+    uint32_t padded_image_size = row_bytes_padded * height;
 
     bmp->data = calloc(1, padded_image_size);
     memcpy(bmp->data, data, (header->image_size_bytes < padded_image_size) ? header->image_size_bytes : padded_image_size);

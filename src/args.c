@@ -102,10 +102,9 @@ void parse_args(int argc,char** args, struct args* argStruct,BMPImage* shadows){
         }
         int32_t shadowHeight=image->header->height_px*ratio;
         int32_t shadowWidth=image->header->width_px*ratio;
-        int32_t shadowSize = shadowHeight*shadowWidth;
         closeImage(image);
         for (int i=0; i<n; i++) {
-            BMPImage aux = createImageFromData(shadows[i]->header, shadows[i]->data, shadowSize, shadowWidth, shadowHeight);
+            BMPImage aux = createImageFromData(shadows[i]->header, shadows[i]->data, shadowWidth, shadowHeight);
             closeImage(shadows[i]);
             shadows[i]=aux;
         }
