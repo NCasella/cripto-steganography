@@ -6,72 +6,10 @@
 #include <stdint.h>
 #include <string.h>
 
-typedef struct term {
-    int coefficient;
-    int order;
-    struct term* nextTerm;
-} term;
-
-typedef term* polynomial;
 
 #define MAX_DEGREE 10
 
-
-static polynomial newPolynomialRec(int* coefficients,int order,bool* mallocNulled){
-    if(order<0){
-        return NULL;
-    }
-    polynomial newTerm=malloc(sizeof(term));
-    if(newTerm==NULL){
-        *mallocNulled=true;
-        return NULL;
-    }
-    newTerm->coefficient=*coefficients;
-    newTerm->order=order;
-    newTerm->nextTerm=newPolynomialRec(coefficients+1,order-1,mallocNulled);
-    return newTerm;
-
-}
-polynomial newPolynomial(int* coefficients,int order){
-    bool mallocNulled=false;
-    polynomial firstTerm= newPolynomialRec(coefficients,order,&mallocNulled);
-    if(mallocNulled){
-        freePolynomial(firstTerm);
-        return NULL;
-    }
-    return firstTerm;
-}
-
-polynomial multiplyPolynomial(polynomial p, int x){
-    polynomial aux=p;
-    while(aux!=NULL){
-        aux->coefficient*=x;
-        aux=aux->nextTerm;
-    }
-    return p;
-}
-
-uint8_t evaluatePolynomial(polynomial p,uint8_t x){
-    polynomial currentTerm=p;
-    int px=0;
-    while(currentTerm!=NULL){
-        px+=currentTerm->coefficient*pow(x,currentTerm->order);
-        currentTerm=currentTerm->nextTerm;
-    }
-    return px;
-}
-
-
-void freePolynomial(polynomial p){
-    polynomial aux=p;
-    while(aux!=NULL){
-        polynomial next=aux->nextTerm;
-        free(aux);
-        aux=next;
-    }
-}
-
-int modInverse(int a, int mod) {
+static int modInverse(int a, int mod) {
     int t = 0, new_t = 1;
     int r = mod, new_r = a;
 
@@ -93,21 +31,14 @@ int modInverse(int a, int mod) {
     return t;
 }
 
-int applyMod(int64_t value, int mod) {
+static int applyMod(int64_t value, int mod) {
     int result = value % mod;
     return result < 0 ? result + mod : result;
 }
 
-void polyMultiply(uint8_t* dest, uint8_t* poly, int xj, int mod, int degree) {
-    memset(dest, 0, MAX_DEGREE);
-    for (int i = degree; i >= 0; i--) {
-        // dest[i+1] += -xj * poly[i]
-        dest[i + 1] = applyMod(dest[i + 1] + poly[i], mod);
-        dest[i] = applyMod(dest[i] - xj * poly[i], mod);
-    }
-}
 
-void getLagrangePolynomialCoefficients(const uint16_t *x, const uint8_t *y, int pointSize, int mod, uint8_t coefficients[]) {
+
+void getInterpolationCoefficients(const uint16_t *x, const uint8_t *y, int pointSize, int mod, uint8_t coefficients[]) {
     uint16_t matrix[MAX_DEGREE][MAX_DEGREE + 1];
     memset(coefficients, 0, pointSize);
 
