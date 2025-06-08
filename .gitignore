@@ -58,3 +58,4 @@ CMakeLists.txt
 cmake_build_debug
 cmake-build-debug
 src/output/*
+visualSSS

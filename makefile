@@ -4,7 +4,7 @@ CFLAGS = -Wall -Wextra -I./src/include -g -fsanitize=address -lm
 SRCS = main.c $(wildcard src/*.c)
 OBJS = $(SRCS:.c=.o)
 
-TARGET = bmpsteg.out
+TARGET = visualSSS
 
 all: $(TARGET)
 

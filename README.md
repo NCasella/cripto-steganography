@@ -4,7 +4,7 @@ El programa puede compilarse usando el Makefile con:
 
 ```make all```
 
-Se generara el ejectuable .out, que debe recibir los siguentes parametros:
+Se generara el ejectuable `visualSSS`, que debe recibir los siguentes parametros:
 
 - -d, --decode: Indica que se distribuira el contenido de una imagen en otras imagenes portadoras.
 - -r, --recover: Indica que se debe requperar una imagen a partir de las imagenes portadoras.
