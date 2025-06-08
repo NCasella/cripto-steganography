@@ -19,14 +19,6 @@ int main(int argc, char **argv) {
     BMPImage image;
     parse_args(argc,argv,&arg,shadows);
 
-
-
-
-
-
-    /*
-
-*/
     if(arg.operation==DISTRIBUTE){
         image=readImage(arg.imagePath);
         encrypt(arg.k,arg.n,image,shadows);

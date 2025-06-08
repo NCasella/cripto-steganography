@@ -28,7 +28,7 @@ void parse_args(int argc,char** args, struct args* argStruct,BMPImage* shadows){
         {"secret",required_argument, NULL, 0xaffa},
         {"dir",required_argument, NULL, 0xcafe},
         {"help",no_argument,NULL,'h'}};
-    
+
     int opt;
     int optIndex;
 
@@ -62,13 +62,13 @@ void parse_args(int argc,char** args, struct args* argStruct,BMPImage* shadows){
                     "--dir <path>   path to look for images\n"
                     "\n");
             exit(EXIT_SUCCESS);
-                
+
         default:
-            fprintf(stderr,"FATAL: unknown argument %c\n",optopt);
+            fprintf(stderr,"FATAL: unknown argument %c, use flag -h to see a list of available arguments\n",optopt);
             exit(EXIT_FAILURE);
         }
     }
- 
+
     if(!(recoverMode ^ distributeMode)){
         fprintf(stderr,"FATAL: either -d OR -r must be specified\n");
         exit(EXIT_FAILURE);
@@ -84,11 +84,11 @@ void parse_args(int argc,char** args, struct args* argStruct,BMPImage* shadows){
         fprintf(stderr,"FATAL: k greater than n value\n");
         exit(EXIT_FAILURE);
     }
-                
+
     argStruct->operation=recoverMode?RECOVER:DISTRIBUTE;
     n=getImagesInDirectory(dirPath,shadows,argStruct->operation,n,k);
     if(n==-1){
-        fprintf(stderr,"FATAL: not enough files for operaation\n");
+        fprintf(stderr,"FATAL: not enough files for operation\n");
         exit(EXIT_FAILURE);
     }
     if(argStruct->operation==DISTRIBUTE){
@@ -104,14 +104,11 @@ void parse_args(int argc,char** args, struct args* argStruct,BMPImage* shadows){
     uint32_t shadowHeight=image->header->height_px*ratio;
     uint32_t shadowWidth=image->header->width_px*ratio;
     uint32_t shadowSize = shadowHeight*shadowWidth;
-    char name[] = "chorizo .bmp";
     closeImage(image);
     for (int i=0; i<n; i++) {
         BMPImage aux=createImageFromData(shadows[i]->header, shadows[i]->data, shadowSize, shadowWidth, shadowHeight);
         closeImage(shadows[i]);
         shadows[i]=aux;
-        name[7] = '0'+i;
-        writeImage(shadows[i], name);
         }
     }
     argStruct->imagePath=imagePath;
@@ -156,13 +153,20 @@ int getImagesInDirectory( char* directory,BMPImage* shadows,operationType op,int
         }
     }
     closedir(dir);
+    for (int i=0; i<filesInDir-1; i++) {
+        if (shadows[i]->header->height_px != shadows[i + 1]->header->height_px ||
+        shadows[i]->header->width_px != shadows[i + 1]->header->width_px) {
+            fprintf(stderr, "Files in directory have different sizes");
+            goto fileError;
+        }
+    }
     if((op==RECOVER && k!=filesInDir)||(op==DISTRIBUTE && filesInDir!=n)){
         fprintf(stderr,"Not enough files for image reveal");
         fileError:
         for(int i=0;i<filesInDir;i++){
             closeImage(shadows[i]);
         }
-        
+
         exit(EXIT_FAILURE);
     }
     return filesInDir;
