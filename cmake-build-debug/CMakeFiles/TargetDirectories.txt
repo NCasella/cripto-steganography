@@ -1,3 +1,0 @@
-/mnt/c/Users/timos/OneDrive/Documentos/Timo/ITBA/Cripto/cripto-steganography/cmake-build-debug/CMakeFiles/cripto_steganography.dir
-/mnt/c/Users/timos/OneDrive/Documentos/Timo/ITBA/Cripto/cripto-steganography/cmake-build-debug/CMakeFiles/edit_cache.dir
-/mnt/c/Users/timos/OneDrive/Documentos/Timo/ITBA/Cripto/cripto-steganography/cmake-build-debug/CMakeFiles/rebuild_cache.dir
