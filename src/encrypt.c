@@ -114,7 +114,7 @@ void decrypt_k8(int k,int width,int height, BMPImage shadows[],char* imagePath){
             pointsY[shadow]=point;
         }
         bitOffset += 8;
-        getLagrangePolynomialCoefficients(pointsX, pointsY, k, MOD, coeffs);
+        getInterpolationCoefficients(pointsX, pointsY, k, MOD, coeffs);
         for(int i=0;i<k;i++){
             imgData[offset+i]=coeffs[i]^nextChar();
             printf("coefficient %d: %d en hex:%x\n",i,coeffs[i],coeffs[i]);
