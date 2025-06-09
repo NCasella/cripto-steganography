@@ -7,7 +7,7 @@ El programa puede compilarse usando el Makefile con:
 Se generara el ejectuable `visualSSS`, que debe recibir los siguentes parametros:
 
 - -d, --decode: Indica que se distribuira el contenido de una imagen en otras imagenes portadoras.
-- -r, --recover: Indica que se debe requperar una imagen a partir de las imagenes portadoras.
+- -r, --recover: Indica que se debe recuperar una imagen a partir de las imagenes portadoras.
 
 - -k [num]: Indica la cantidad de imagenes portadoras necesarias para recuperar la imagen a ocultar.
 - --secret [path]: Ubicacion de la imagen a distribuir (si es modo distribuir) o de la imagen a recuperar (si es modo recuperar).
