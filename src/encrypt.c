@@ -47,11 +47,11 @@ static int intPowMod(int base, int exp) {
    return acc%MOD;
 }
 void encrypt(int r, int n, BMPImage image,BMPImage shadows[]){
-    
+    setSeed(SET);
     //genero n sombras -> n imagenes bmp
     //{puntero_bmp1,  puntero_bmp2, ...}
     for(int i=0;i<n;i++){
-        shadows[i]->header->seed=getSeed();
+        shadows[i]->header->seed=(uint16_t)SET;
     }
     uint8_t obscuredImage[image->header->height_px * image->header->width_px];
     obscureImage(image->header->width_px, image->header->height_px, image, obscuredImage);
@@ -120,6 +120,7 @@ void decrypt_k8(int k,int width,int height, BMPImage shadows[],char* imagePath){
 }
 
 void decrypt(int r, BMPImage shadows[],char* imagePath) {
+    setSeed(shadows[0]->header->seed);
     decrypt_k8(r,shadows[0]->header->width_px / ratios[r], shadows[0]->header->height_px / ratios[r], shadows,imagePath);
 }
 
