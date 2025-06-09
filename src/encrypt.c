@@ -110,14 +110,13 @@ void decrypt_k8(int k,int width,int height, BMPImage shadows[],char* imagePath){
             }
             printf("\n");
             printf("%d\n",point);
-            pointsX[shadow]=shadows[shadow]->header->shadowNumber+1;
+            pointsX[shadow]=shadows[shadow]->header->shadowNumber;
             pointsY[shadow]=point;
         }
         bitOffset += 8;
         getInterpolationCoefficients(pointsX, pointsY, k, MOD, coeffs);
         for(int i=0;i<k;i++){
             imgData[offset+i]=coeffs[i]^nextChar();
-            printf("coefficient %d: %d en hex:%x\n",i,coeffs[i],coeffs[i]);
         }
     }
     writeImage(revealedImg,imagePath);
@@ -191,7 +190,7 @@ void encryptProcess(int n,int k, int width, int height, const uint8_t obscuredIm
     for(uint16_t i=0;i<n;i++){
         char shadowName[]="shadow .bmp";
         shadowName[6]=i+'0';
-        shadows[i]->header->shadowNumber=i;
+        shadows[i]->header->shadowNumber=i+1;
         writeImage(shadows[i],shadowName);
     }
 }
