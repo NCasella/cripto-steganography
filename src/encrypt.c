@@ -98,14 +98,11 @@ void decrypt_k8(int k,int width,int height, BMPImage shadows[],char* imagePath){
         uint8_t coeffs[k];
         uint8_t pointsY[k];
         uint16_t pointsX[k];
-        printf("seccion%d\n",j);
         for(int shadow=0;shadow<k;shadow++){
             uint8_t point=0;
-            printf("shadowak sjfbjaf: %d\n",shadow);
             for(int i=0;i<8;i++){
                 uint8_t shadowByte=getByte(shadows[shadow],bitOffset+i);
                 point=point<<1|getBitAt(shadowByte,0);//LSB
-                printf("%d",getBitAt(shadowByte,0));
 
             }
             printf("\n");
@@ -141,24 +138,15 @@ void encryptProcess(int n,int k, int width, int height, const uint8_t obscuredIm
         //creo el j-esimo polinomio
         polSize=0;
         for(int i=0; i<k; i++){
-            printf("OFFSET: %d\n", offset+i);
-            printf("FOSIOJFAFJFAKS%d\n", offset+i);
             coefficients[i]=obscuredImage[offset+i]; //i-esimo pixel de la seccion j -> coeficiente del polinomio
 
             polSize++;
         }
-        printf("Current poly:");
-        for(int m=0; m<polSize;m++){
-            printf("+%x x^%d", coefficients[m], m);
-        }
-        printf("\n");
         for(int N=1; N<=n; N++){
             int flag=0;
-            printf("p(%d)=%x\n", N, compute_polynomial(N, polSize,coefficients,&flag));
             //piso el j-esimo bit en la k-esima shadow
             //shadows[k-1][j] = compute_polynomial(k, coefficients);
         }
-        printf("fin seccion %d, [%d, %d]\n", j, offset+1, offset+8);
 
        uint8_t p_xi[n];
         for(int shadow=0; shadow<n; shadow++){

@@ -13,7 +13,7 @@
 
 int main(int argc, char **argv) {
 
-
+    setSeed(12348); // Set a fixed seed for reproducibility
     struct args arg;
     BMPImage shadows[10];
     BMPImage image;
