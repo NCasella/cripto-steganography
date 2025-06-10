@@ -28,13 +28,21 @@ typedef struct {
 } BMPHeader;
 #pragma pack(pop)
 
+typedef struct BMPImageStruct{
+    BMPHeader* header;
+    byte* data;
+} BMPImageStruct;
+
+
 typedef struct BMPImageStruct* BMPImage;
 
 BMPImage readImage(const char *filename);
 
 BMPImage createBlankImage(uint32_t imageSize, uint32_t headerSize);
 
-BMPImage createImageFromData(BMPHeader* header, byte* data, uint32_t size, uint32_t width, uint32_t height);
+BMPImage createImageCopy(BMPImage image);
+
+BMPImage createImageFromData(BMPHeader* header, byte* data, int32_t width, int32_t height);
 
 void writeImage(BMPImage bmp, const char *filename);
 
@@ -46,5 +54,14 @@ uint32_t getHeaderSize(BMPImage bmp);
 
 byte* getData(BMPImage bmp);
 
+/**
+ * Returns the pixel value at a specific row and column in the BMP image.
+ *
+ * @param width     the width of the image.
+ * @param height    the height of the image.
+ * @param image     the bmp image.
+ * @return the pixel value or -1 if an error ocurred.
+ */
+uint8_t getByte(BMPImage image, int index);
 
 #endif //CRIPTO_STEGANOGRAPHY_BMPADT_H

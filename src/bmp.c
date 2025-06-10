@@ -8,12 +8,6 @@
 #include <errno.h>
 #include <asm-generic/errno-base.h>
 
-typedef struct BMPImageStruct{
-    BMPHeader* header;
-    byte* data;
-} BMPImageStruct;
-
-
 BMPImage readImage(const char *filename) {
     FILE *imageFile = fopen(filename, "rb");
     if (!imageFile) {
@@ -86,24 +80,47 @@ BMPImage createBlankImage(uint32_t imageSize, uint32_t headerSize) {
     BMPImage bmp = malloc(sizeof(BMPImageStruct));
     bmp->header = malloc(headerSize);
     bmp->header->image_size_bytes = imageSize;
-    bmp->data = malloc(sizeof(byte) * imageSize);
+    bmp->header->offset = headerSize;
+    bmp->data = calloc(1,sizeof(byte) * imageSize);
     bmp->header->size = imageSize + headerSize;
     return bmp;
 }
 
-BMPImage createImageFromData(BMPHeader* header, byte* data, uint32_t size, uint32_t width, uint32_t height) {
-    BMPImage bmp = malloc(sizeof(BMPImageStruct));
-    bmp->header = malloc(header->offset);
-    bmp->data = malloc(sizeof(byte) * size);
-    memcpy(bmp->data, data, size);
+BMPImage createImageCopy(BMPImage image) {
+    return createImageFromData(image->header, image->data, image->header->width_px, image->header->height_px);
+}
+
+BMPImage createImageFromData(BMPHeader* header, byte* data, int32_t width, int32_t height) {
+    BMPImage bmp = calloc(1, sizeof(BMPImageStruct));
+
+    bmp->header = calloc(1, header->offset);
+
+    int bits_per_pixel = header->bits_per_pixel;
+    int bytes_per_pixel = bits_per_pixel / 8;
+    int row_bytes_unpadded = width * bytes_per_pixel;
+
+    int row_bytes_padded = (row_bytes_unpadded + 3) & ~3;
+    uint32_t padded_image_size = row_bytes_padded * height;
+
+    bmp->data = calloc(1, padded_image_size);
+    memcpy(bmp->data, data, (header->image_size_bytes < padded_image_size) ? header->image_size_bytes : padded_image_size);
+
     memcpy(bmp->header, header, header->offset);
-    bmp->header->image_size_bytes = size;
-    bmp->header->size = size + header->offset;
+
     bmp->header->width_px = width;
     bmp->header->height_px = height;
+    bmp->header->image_size_bytes = padded_image_size;
+    bmp->header->size = header->offset + padded_image_size;
+
+    if (bits_per_pixel <= 8) {
+        int palette_entries = 1 << bits_per_pixel;
+        bmp->header->offset = sizeof(BMPHeader) + palette_entries * 4;
+        bmp->header->num_colors = palette_entries;
+    }
 
     return bmp;
 }
+
 
 int _mkdirs(const char *path) {
     char tmp[1024];
@@ -192,7 +209,7 @@ void closeImage(BMPImage bmp) {
 }
 
 void getHeaderCopy(BMPImage bmp, BMPHeader* toCopy) {
-    memcpy(toCopy, bmp->header, HEADER_SIZE);
+    memcpy(toCopy, bmp->header, bmp->header->offset);
 }
 
 uint32_t getHeaderSize(BMPImage bmp) {
@@ -203,3 +220,13 @@ byte* getData(BMPImage bmp) {
     return bmp->data;
 }
 
+uint8_t getByte(BMPImage image, int index){
+	byte * data = image->data;
+    int width = image->header->width_px;
+    int height = image->header->height_px;
+
+    if (index < 0 || index >= width * height) {
+        return -1; // Invalid index
+    }
+    return data[index];
+}

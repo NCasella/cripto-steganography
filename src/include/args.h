@@ -1,6 +1,6 @@
 #ifndef ARGS_H
 #define ARGS_H
-
+#include "bmp.h"
 #include <stdbool.h>
 
 typedef enum operationType {DISTRIBUTE ,RECOVER} operationType;
@@ -13,6 +13,6 @@ struct args{
     int k;
 };
 
-void parse_args(int argc,char** args,struct args* argStruct);
+void parse_args(int argc,char** args,struct args* argStruct,BMPImage* shadows);
 
 #endif  /* ARGS_H */
