@@ -14,7 +14,7 @@ Se generara el ejectuable `visualSSS`, que debe recibir los siguentes parametros
 
 Opcionalmente, el ejecutable recibe los siguientes parametros:
 
-- --path [path]: Directorio en el que se encuentran las imagenes portadoras. De no especificarse se usara el directorio actual.
+- --dir [path]: Directorio en el que se encuentran las imagenes portadoras. De no especificarse se usara el directorio actual.
 
 - -n [num]: Numero de imagenes portadoras en las que se distribuira la imagen a ocultar. De no especificarse, se usaran la cantidad de imagenes en el directorio especificado (o el actual si no fue especificado).
 
